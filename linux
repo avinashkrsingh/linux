@@ -1,19 +1,25 @@
 #!/bin/bash
 
-# Read the line from the file
-input=$(cat input.txt)
-
-# Extract the string inside the double quotes
-extracted_string=$(echo "$input" | grep -oP 'Assert\.assertTrue\("\K[^"]+')
-
-# Remove spaces from the extracted string
-modified_string=$(echo "$extracted_string" | tr -d '[:space:]')
+# Define the input file
+input_file="input.txt"
 
 # Define variable name
 variable_name="variable"
 
-# Format the string as variablename = string
-formatted_variable="$variable_name = \"$modified_string\""
+# Loop through each line in the file
+while IFS= read -r line; do
+    # Extract the string inside the double quotes
+    extracted_string=$(echo "$line" | grep -oP 'Assert\.assertTrue\("\K[^"]+')
 
-# Print the formatted variable
-echo "Formatted variable: $formatted_variable"
+    # Remove spaces from the extracted string
+    modified_string=$(echo "$extracted_string" | tr -d '[:space:]')
+
+    # Format the string as variablename = string
+    formatted_variable="$modified_string = \"$extracted_string\""
+
+    # Print the formatted variable
+    echo "Formatted variable: $formatted_variable"
+
+    # Print a newline
+    echo
+done < "$input_file"
