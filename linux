@@ -1,1 +1,4 @@
 sed -i 's/.*\.\(isDisplayed\)(\(.*\))/IsElementDisplayed(\1\2)/' YourJavaFile.java
+
+
+echo "me.get.isDisplayed()" | grep -oP '.*(?=\.isDisplayed\(\))' | sed 's/.*/IsElementDisplayed(&)/'
