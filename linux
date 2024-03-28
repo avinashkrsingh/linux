@@ -3,25 +3,23 @@
 # Function to convert camel case to upper case
 camelToUpperCase() {
     local input="$1"
-    # Use sed to insert underscores before capital letters
-    local underscored=$(echo "$input" | sed 's/\([^A-Z]\)\([A-Z]\)/\1_\2/g')
     # Use awk to convert to upper case
-    local upper=$(echo "$underscored" | awk '{print toupper($0)}')
+    local upper=$(echo "$input" | awk '{print toupper($0)}')
     echo "$upper"
 }
 
-# Input file containing Java declarations
+# Input Java file
 inputFile="YourFile.java"
 # Temporary file to store modified content
 outputFile="converted_variables.txt"
 
-# Search for lines with "public static final string" and convert variable names
+# Process each line in the input file
 while IFS= read -r line; do
-    # Check if the line contains "public static final string"
-    if grep -q "public static final string" <<< "$line"; then
-        # Extract variable name after "public static final string"
-        varName=$(echo "$line" | sed 's/.*public static final string \([a-zA-Z0-9_]*\).*/\1/')
-        # Convert camel case variable name to upper case
+    # Check if line contains "assertTrue(string," or "assertEqual(string,"
+    if grep -qE "assertTrue\(string," <<< "$line" || grep -qE "assertEqual\(string," <<< "$line"; then
+        # Extract variable name after "string,"
+        varName=$(echo "$line" | sed -E 's/.*string, ([a-zA-Z0-9_]*).*/\1/')
+        # Convert variable name to upper case
         convertedVar=$(camelToUpperCase "$varName")
         # Replace variable name in line with converted variable name
         updatedLine=$(echo "$line" | sed "s/$varName/$convertedVar/g")
