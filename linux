@@ -1,1 +1,1 @@
-sed -E 's/(Assert\.assertTrue\(\s*[^,]+),/\U\1\E,/g' YourFile.java
+sed -i -E 's/((Assert\.assertTrue|Assert\.assertEquals|\bassertTrue|\bassertEquals)\(\s*[^,]+),/\U\1\E,/g' YourFile.java
