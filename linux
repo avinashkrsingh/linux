@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 # Function to convert camel case to upper case
@@ -11,17 +10,25 @@ camelToUpperCase() {
     echo "$upper"
 }
 
-# File containing variable names in camel case
-inputFile="variables.txt"
+# Input file containing Java declarations
+inputFile="YourFile.java"
 # Temporary file to store modified content
 outputFile="converted_variables.txt"
 
-# Process each line in the input file
+# Search for lines with "public static final string" and convert variable names
 while IFS= read -r line; do
-    # Convert camel case variable name to upper case
-    convertedVar=$(camelToUpperCase "$line")
-    # Replace variable name in line with converted variable name
-    sed -i "s/$line/$convertedVar/g" "$outputFile"
+    # Check if the line contains "public static final string"
+    if grep -q "public static final string" <<< "$line"; then
+        # Extract variable name after "public static final string"
+        varName=$(echo "$line" | sed 's/.*public static final string \([a-zA-Z0-9_]*\).*/\1/')
+        # Convert camel case variable name to upper case
+        convertedVar=$(camelToUpperCase "$varName")
+        # Replace variable name in line with converted variable name
+        updatedLine=$(echo "$line" | sed "s/$varName/$convertedVar/g")
+        echo "$updatedLine" >> "$outputFile"
+    else
+        echo "$line" >> "$outputFile"
+    fi
 done < "$inputFile"
 
 echo "Conversion completed. Output saved to $outputFile"
