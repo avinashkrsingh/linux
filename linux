@@ -3,8 +3,10 @@
 # Function to convert camel case to upper case
 camelToUpperCase() {
     local input="$1"
+    # Use sed to insert underscores before capital letters
+    local underscored=$(echo "$input" | sed 's/\([^A-Z]\)\([A-Z]\)/\1_\2/g')
     # Use awk to convert to upper case
-    local upper=$(echo "$input" | awk '{print toupper($0)}')
+    local upper=$(echo "$underscored" | awk '{print toupper($0)}')
     echo "$upper"
 }
 
@@ -15,10 +17,10 @@ outputFile="converted_variables.txt"
 
 # Process each line in the input file
 while IFS= read -r line; do
-    # Check if line contains "assertTrue(string," or "assertEqual(string,"
-    if grep -qE "assertTrue\(string," <<< "$line" || grep -qE "assertEqual\(string," <<< "$line"; then
-        # Extract variable name after "string,"
-        varName=$(echo "$line" | sed -E 's/.*string, ([a-zA-Z0-9_]*).*/\1/')
+    # Check if line contains "assertTrue(," or "assertEqual(,"
+    if grep -qE "assertTrue\(," <<< "$line" || grep -qE "assertEqual\(," <<< "$line"; then
+        # Extract variable name before ","
+        varName=$(echo "$line" | sed -E 's/.*\(, ([a-zA-Z0-9_]*).*/\1/')
         # Convert variable name to upper case
         convertedVar=$(camelToUpperCase "$varName")
         # Replace variable name in line with converted variable name
