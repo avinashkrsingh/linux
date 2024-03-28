@@ -1,29 +1,24 @@
 #!/bin/bash
 
-# Function to convert camel case to upper case
-camelToUpperCase() {
-    local input="$1"
-    # Use sed to insert underscores before capital letters
-    local underscored=$(echo "$input" | sed 's/\([^A-Z]\)\([A-Z]\)/\1_\2/g')
-    # Use awk to convert to upper case
-    local upper=$(echo "$underscored" | awk '{print toupper($0)}')
-    echo "$upper"
-}
-
 # Input Java file
 inputFile="YourFile.java"
 # Temporary file to store modified content
 outputFile="converted_variables.txt"
 
+# Function to convert a string to uppercase
+toUpper() {
+    echo "$1" | awk '{print toupper($0)}'
+}
+
 # Process each line in the input file
 while IFS= read -r line; do
-    # Check if line contains "assertTrue(," or "assertEqual(,"
-    if grep -qE "assertTrue\(," <<< "$line" || grep -qE "assertEqual\(," <<< "$line"; then
-        # Extract variable name before ","
-        varName=$(echo "$line" | sed -E 's/.*\(, ([a-zA-Z0-9_]*).*/\1/')
-        # Convert variable name to upper case
-        convertedVar=$(camelToUpperCase "$varName")
-        # Replace variable name in line with converted variable name
+    # Check if line contains "Assert.assertTrue(" or "Assert.assertEqual("
+    if grep -qE "Assert\.assertTrue\(.*\)" <<< "$line" || grep -qE "Assert\.assertEqual\(.*\)" <<< "$line"; then
+        # Extract string name between "(" and ","
+        varName=$(echo "$line" | sed -E 's/Assert\.assertTrue\(.*\)([[:space:]]*|\())([[:alnum:]_]+)([[:space:]]*|,).*/\3/')
+        # Convert string name to uppercase
+        convertedVar=$(toUpper "$varName")
+        # Replace string name in line with converted string name
         updatedLine=$(echo "$line" | sed "s/$varName/$convertedVar/g")
         echo "$updatedLine" >> "$outputFile"
     else
