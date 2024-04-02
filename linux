@@ -1,1 +1,24 @@
-sed -i -E 's/((Assert\.assertTrue|Assert\.assertEquals|\bassertTrue|\bassertEquals)\(\s*[^,]+),/\U\1\E,/g' YourFile.java
+List<WebElement> textBoxes = driver.findElements(By.className("textboxClass"));
+
+        // Store the double values in a list
+        List<Double> valuesList = new ArrayList<>();
+
+        // Loop through each text box
+        for (WebElement textBox : textBoxes) {
+            // Get the value from the text box
+            String valueString = textBox.getAttribute("value");
+
+            // Convert the value to double
+            double value = Double.parseDouble(valueString);
+
+            // Store the double value in the list
+            valuesList.add(value);
+        }
+
+        // Sort the list
+        Collections.sort(valuesList);
+
+        // Assert that the values are in ascending order
+        for (int i = 1; i < valuesList.size(); i++) {
+            assert valuesList.get(i - 1) <= valuesList.get(i) : "Values are not in ascending order";
+        }
