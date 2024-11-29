@@ -25,3 +25,17 @@ for REPO in "${REPOSITORIES[@]}"; do
     "base": "$TARGET_BRANCH",
     "body": "This PR merges changes from $SOURCE_BRANCH into $TARGET_BRANCH for release preparation."
   }
+
+
+
+  #!/bin/bash
+
+# List of repositories where the PR will be created
+REPOSITORIES=("repo1" "repo2" "repo3")
+
+# Loop through each repository
+for REPO in "${REPOSITORIES[@]}"; do
+  # Create the PR using GitHub CLI
+  gh pr create --repo "$USERNAME/$REPO" --base release/rel_39.0.0 --head dev/rel_39.0 --title "Merge dev/rel_39.0 into release/rel_39.0.0" --body "This PR merges changes from dev/rel_39.0 into release/rel_39.0.0 for release preparation."
+done
+
