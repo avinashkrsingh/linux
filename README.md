@@ -1,37 +1,38 @@
 #!/bin/bash
 
-# GitHub API endpoint and your personal access token
-GITHUB_API="https://api.github.com"
-GITHUB_TOKEN="your_personal_access_token"  # Replace with your actual GitHub token
-USERNAME="your_github_username"            # Replace with your GitHub username
+# Set branch names
+DEV_BRANCH="dev/39.0"
+RELEASE_BRANCH="release/39.0"
 
-# List of repositories where the PR will be created
-REPOSITORIES=("repo1" "repo2" "repo3")  # Replace with the actual repositories
+# Fetch the latest changes from the remote repository
+git fetch origin
 
-# Source and target branches
-SOURCE_BRANCH="dev/rel_39.0"
-TARGET_BRANCH="release/rel_39.0.0"
+# Checkout the release branch
+echo "Checking out the $RELEASE_BRANCH branch..."
+git checkout $RELEASE_BRANCH
 
-# Loop through each repository
-for REPO in "${REPOSITORIES[@]}"; do
-  # Create a pull request using GitHub API
-  RESPONSE=$(curl -s -X POST \
-    -H "Authorization: token $GITHUB_TOKEN" \
-    -H "Accept: application/vnd.github.v3+json" \
-    -d '{
-      "title": "Merge '"$SOURCE_BRANCH"' into '"$TARGET_BRANCH"'",
-      "head": "'"$SOURCE_BRANCH"'",
-      "base": "'"$TARGET_BRANCH"'",
-      "body": "This PR merges changes from '"$SOURCE_BRANCH"' into '"$TARGET_BRANCH"' for release preparation."
-    }' "$GITHUB_API/repos/$USERNAME/$REPO/pulls")
+# Pull the latest changes for the release branch (optional, in case there are changes not yet merged locally)
+echo "Pulling the latest changes for $RELEASE_BRANCH..."
+git pull origin $RELEASE_BRANCH
 
-  # Check if the pull request was created successfully
-  PR_URL=$(echo "$RESPONSE" | jq -r '.html_url')
+# Checkout the dev branch and merge into release branch
+echo "Merging $DEV_BRANCH into $RELEASE_BRANCH..."
+git checkout $DEV_BRANCH
+git pull origin $DEV_BRANCH  # Ensure the dev branch is up-to-date
+git checkout $RELEASE_BRANCH
 
-  if [[ "$PR_URL" != "null" ]]; then
-    echo "Pull request created successfully for '$REPO': $PR_URL"
-  else
-    ERROR_MSG=$(echo "$RESPONSE" | jq -r '.message')
-    echo "Failed to create PR for '$REPO': $ERROR_MSG"
-  fi
-done
+# Perform the merge
+git merge $DEV_BRANCH
+
+# Resolve conflicts (if any)
+if [ $? -ne 0 ]; then
+    echo "Merge conflicts detected. Please resolve them manually."
+    exit 1
+fi
+
+# Push the merged changes to the remote repository
+echo "Pushing the merged changes to $RELEASE_BRANCH..."
+git push origin $RELEASE_BRANCH
+
+# Provide a success message
+echo "Merge of $DEV_BRANCH into $RELEASE_BRANCH was successful and changes were pushed to the remote."
