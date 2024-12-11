@@ -25,7 +25,7 @@ for folder in "$directory"/*/; do
     # Extract folder name (strip trailing slash)
     folder_name=$(basename "$folder")
       # Remove the "afa" prefix if it exists
-    folder_name_cleaned=$(echo "$folder_name" | sed 's/^168426\.totalconduct\.//')
+    folder_name_cleaned=$(echo "$folder_name" | sed 's/^t\.//')
     
     # Append folder name in the desired format to the output file
     echo " - displayName: \"$folder_name\"" >> "$output_file"
