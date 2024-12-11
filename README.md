@@ -1,54 +1,34 @@
 #!/bin/bash
 
-# List of repositories (local directories where the repositories are stored)
-REPOS=("repo1" "repo2" "repo3")  # Add your repository folder names here
+# Specify the directory containing the folders
+directory="$1"
 
-# Define branch names
-DEV_BRANCH="dev"        # or "dev/39.0", depending on your naming convention
-RELEASE_BRANCH="release"  # or "release/39.0"
+# Check if the directory is provided and exists
+if [ -z "$directory" ]; then
+  echo "Please provide a directory."
+  exit 1
+elif [ ! -d "$directory" ]; then
+  echo "The specified directory does not exist."
+  exit 1
+fi
 
-# Loop through each repository
-for REPO in "${REPOS[@]}"
-do
-  echo "Processing repository: $REPO"
-  
-  # Navigate into the repository directory
-  cd "$REPO" || { echo "Directory $REPO not found!"; exit 1; }
+# Output file to store the generated content
+output_file="foldernames.yml"
 
-  # Fetch the latest changes from the remote repository
-  echo "Fetching the latest changes from the remote repository..."
-  git fetch origin
-  
-  # Checkout the release branch
-  echo "Checking out the $RELEASE_BRANCH branch..."
-  git checkout $RELEASE_BRANCH || { echo "Failed to checkout $RELEASE_BRANCH in $REPO"; exit 1; }
+# Start the output file
+echo "#start of foldername" > "$output_file"
 
-  # Pull the latest changes for the release branch
-  echo "Pulling the latest changes for $RELEASE_BRANCH..."
-  git pull origin $RELEASE_BRANCH || { echo "Failed to pull changes for $RELEASE_BRANCH in $REPO"; exit 1; }
-
-  # Checkout the dev branch and pull the latest changes
-  echo "Checking out the $DEV_BRANCH branch..."
-  git checkout $DEV_BRANCH || { echo "Failed to checkout $DEV_BRANCH in $REPO"; exit 1; }
-  git pull origin $DEV_BRANCH || { echo "Failed to pull changes for $DEV_BRANCH in $REPO"; exit 1; }
-
-  # Checkout the release branch again before merging
-  echo "Switching back to $RELEASE_BRANCH branch..."
-  git checkout $RELEASE_BRANCH || { echo "Failed to checkout $RELEASE_BRANCH again in $REPO"; exit 1; }
-
-  # Perform the merge
-  echo "Merging $DEV_BRANCH into $RELEASE_BRANCH..."
-  git merge $DEV_BRANCH || { echo "Merge conflict in $REPO. Please resolve manually."; exit 1; }
-
-  # Push the merged changes to the remote repository
-  echo "Pushing changes to $RELEASE_BRANCH..."
-  git push origin $RELEASE_BRANCH || { echo "Failed to push changes to $RELEASE_BRANCH in $REPO"; exit 1; }
-
-  # Move back to the parent directory to process the next repo
-  cd ..
-  
-  echo "Successfully merged $DEV_BRANCH into $RELEASE_BRANCH in $REPO."
-  echo "---------------------------------------------------"
+# Loop through each folder in the specified directory
+for folder in "$directory"/*/; do
+  # Check if it's a directory
+  if [ -d "$folder" ]; then
+    # Extract folder name (strip trailing slash)
+    folder_name=$(basename "$folder")
+    
+    # Append folder name in the desired format to the output file
+    echo " - displayName: \"$folder_name\"" >> "$output_file"
+    echo "     regex: \".*$folder_name.*\"" >> "$output_file"
+  fi
 done
 
-echo "All repositories processed successfully."
+echo "Output written to $output_file"
