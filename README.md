@@ -4,11 +4,8 @@
 input_file="your_file.yaml"
 output_file="cleaned_file.yaml"
 
-# Regex pattern to match lines containing "168426.tc.ucm-case"
-pattern="d\.tcs\.ucm-case"
+# Use sed to dynamically capture the part after "168426.tc."
+# and replace it with ".*<captured_value>*"
+sed -E 's/(dddsds\.sdd\.[^ ]*)/.*\1.*/g' "$input_file" > "$output_file"
 
-# Use sed to delete lines that match the regex pattern
-# The sed command removes any lines that contain the specified pattern
-sed "/$pattern/d" "$input_file" > "$output_file"
-
-echo "Unwanted entries removed and saved to '$output_file'"
+echo "Pattern replaced dynamically and saved to '$output_file'"
