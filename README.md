@@ -1,26 +1,13 @@
 #!/bin/bash
 
-# Define the branches to keep
-keep_branches=("main" "e" "r" "t" "y" "sa" "a" "arqr" "q")
+# Set the folder to exclude
+exclude_folder="2025folder"
 
-# List all local branches
-local_branches=$(git branch | sed 's/^\* //' | tr -d ' ')
-
-# Loop through each local branch and delete if not in the keep list
-for branch in $local_branches; do
-    if [[ ! " ${keep_branches[@]} " =~ " ${branch} " ]]; then
-        echo "Deleting local branch: $branch"
-        git branch -D $branch
-    fi
-done
-
-# List all remote branches
-remote_branches=$(git branch -r | sed 's/origin\///' | tr -d ' ')
-
-# Loop through each remote branch and delete if not in the keep list
-for branch in $remote_branches; do
-    if [[ ! " ${keep_branches[@]} " =~ " ${branch} " ]]; then
-        echo "Deleting remote branch: $branch"
-        git push origin --delete $branch
-    fi
+# Loop through the contents of the current directory
+for item in *; do
+  # Check if the item is not the folder you want to keep
+  if [ "$item" != "$exclude_folder" ]; then
+    # Remove the item (file or directory)
+    rm -rf "$item"
+  fi
 done
