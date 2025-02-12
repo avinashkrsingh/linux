@@ -5,19 +5,26 @@ JIRA_URL="https://your-domain.atlassian.net/rest/api/3/issue"  # Jira API endpoi
 AUTH_TOKEN="your-personal-access-token"  # Replace with your Jira Personal Access Token
 PROJECT_KEY="PROJ"  # Replace with your Jira project key
 ISSUE_TYPE="Task"  # Replace with the appropriate issue type (e.g., Task, Bug, Story)
-EXCEL_FILE="your-file.xlsx"  # Path to your Excel file
-CSV_FILE="output.csv"  # Temporary CSV file
+CSV_FILE="output.csv"  # Your converted CSV file (manual conversion from Excel)
 
-# Convert Excel to CSV (using a tool like libreoffice or xlsx2csv)
-# Example: libreoffice --headless --convert-to csv your-file.xlsx
-# or use `xlsx2csv` tool to convert the Excel file:
-xlsx2csv "$EXCEL_FILE" "$CSV_FILE"
+# Read the header to find the column indices dynamically
+HEADER=$(head -n 1 "$CSV_FILE")
+DESCRIPTION1_INDEX=$(echo "$HEADER" | tr ',' '\n' | grep -n '^Description1$' | cut -d: -f1)
+DESCRIPTION4_INDEX=$(echo "$HEADER" | tr ',' '\n' | grep -n '^Description4$' | cut -d: -f1)
 
-# Read CSV and create Jira issues
-# Skip the header row with "tail -n +2" and loop through each line
-tail -n +2 "$CSV_FILE" | while IFS=, read -r description4_1 description4_2; do
-  # Combine the two description4 fields into Summary
-  SUMMARY="$description4_1 | $description4_2"
+if [ -z "$DESCRIPTION1_INDEX" ] || [ -z "$DESCRIPTION4_INDEX" ]; then
+  echo "Error: Could not find 'Description1' or 'Description4' column in the CSV."
+  exit 1
+fi
+
+# Read CSV file and loop through each line, starting from line 2 (skip header)
+tail -n +2 "$CSV_FILE" | while IFS=, read -r line; do
+  # Extract the Description1 and Description4 columns dynamically using the found indices
+  DESCRIPTION1=$(echo "$line" | cut -d',' -f"$DESCRIPTION1_INDEX")
+  DESCRIPTION4=$(echo "$line" | cut -d',' -f"$DESCRIPTION4_INDEX")
+
+  # Combine Description1 and Description4 into Summary
+  SUMMARY="$DESCRIPTION4 | $DESCRIPTION1"
   
   # Create the issue payload in JSON format
   ISSUE_DATA=$(cat <<EOF
@@ -27,7 +34,7 @@ tail -n +2 "$CSV_FILE" | while IFS=, read -r description4_1 description4_2; do
       "key": "$PROJECT_KEY"
     },
     "summary": "$SUMMARY",
-    "description": "$description4_1",  # Use the first description4 field as the description
+    "description": "$DESCRIPTION4",  # Use Description4 field as the description
     "issuetype": {
       "name": "$ISSUE_TYPE"
     }
@@ -47,7 +54,4 @@ EOF
   if [ "$RESPONSE" == "201" ]; then
     echo "Successfully created issue: $SUMMARY"
   else
-    echo "Failed to create issue: $SUMMARY"
-    cat response.json  # Print the error message from Jira
-  fi
-done
+    echo "Failed to create
