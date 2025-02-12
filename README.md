@@ -43,6 +43,23 @@ tail -n +2 "$CSV_FILE" | while IFS=, read -r line; do
 EOF
 )
 
+duedate="1-Mar-2025"
+
+# Create a month-to-number mapping
+month_name=$(echo $duedate | cut -d'-' -f2)
+months=("Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec")
+month_num=$(printf "%02d" $(($(echo ${months[@]} | tr ' ' '\n' | grep -i -n "^$month_name" | cut -d: -f1) )))
+
+# Extract day and year
+day=$(echo $duedate | cut -d'-' -f1)
+year=$(echo $duedate | cut -d'-' -f3)
+
+# Format to YYYY-MM-DD
+formatted_date="$year-$month_num-$(printf "%02d" $day)"
+
+echo $formatted_date
+
+
   # Send POST request to create the issue
   RESPONSE=$(curl -s -o response.json -w "%{http_code}" -X POST \
     -H "Authorization: Bearer $AUTH_TOKEN" \
