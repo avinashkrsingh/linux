@@ -1,28 +1,16 @@
-<build>
-    <plugins>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <version>3.3.0</version>
-            <executions>
-                <execution>
-                    <phase>install</phase>
-                    <goals>
-                        <goal>copy</goal>
-                    </goals>
-                    <configuration>
-                        <artifactItems>
-                            <artifactItem>
-                                <groupId>com.example</groupId>
-                                <artifactId>your-library</artifactId>
-                                <version>1.0.0</version>
-                                <type>jar</type>
-                                <outputDirectory>${project.basedir}/lib</outputDirectory>
-                            </artifactItem>
-                        </artifactItems>
-                    </configuration>
-                </execution>
-            </executions>
-        </plugin>
-    </plugins>
-</build>
+curl -X POST \
+     -H "Authorization: Bearer your-personal-access-token" \
+     -H "Content-Type: application/json" \
+     --data '{
+         "fields": {
+             "project": {
+                 "key": "PROJ"
+             },
+             "summary": "New issue created via API using PAT",
+             "description": "This issue was created through the Jira API using a Personal Access Token.",
+             "issuetype": {
+                 "name": "Bug"
+             }
+         }
+     }' \
+     https://your-domain.atlassian.net/rest/api/3/issue
