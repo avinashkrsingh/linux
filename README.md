@@ -72,3 +72,12 @@ echo $formatted_date
     echo "Successfully created issue: $SUMMARY"
   else
     echo "Failed to create
+
+
+    if [[ "$Type" == "VA ISSUE" || "$Type" == "VA Testing- Unchdule" ]]; then
+    echo "Condition Matched: VA ISSUE or VA Testing- Unchdule"
+elif [[ "$Type" == "Some Other Type" ]]; then
+    echo "Condition Matched: Some Other Type"
+else
+    echo "Condition Not Matched"
+fi
