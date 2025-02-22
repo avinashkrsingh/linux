@@ -18,31 +18,24 @@
       overflow: hidden;
     }
 
-    /* Citi Header with Fade-In Animation */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
+    /* Citi-Themed Header */
     .header {
-      background: linear-gradient(90deg, #0033a0, #00aef3); /* Citi blue gradient */
+      background: linear-gradient(90deg, #0033a0, #00aef3);
       color: white;
       text-align: center;
-      padding: 40px 20px;
-      animation: fadeIn 2s ease-in-out;
+      padding: 30px 20px;
     }
 
     .header h1 {
       margin: 0;
-      font-size: 36px;
-      color: #ffffff;
+      font-size: 32px;
       text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
     }
 
     .header p {
       font-size: 18px;
-      margin: 10px 0 0;
-      color: #ff3a30; /* Citi red accent */
+      margin: 5px 0 0;
+      color: #ff3a30;
     }
 
     /* Main Content */
@@ -57,86 +50,73 @@
       padding-bottom: 5px;
     }
 
-    .highlight {
+    /* Highlight Box */
+    .info-box {
       background-color: #e7f4ff;
-      padding: 5px 10px;
-      border-radius: 5px;
-      display: inline-block;
-      color: #0033a0;
+      padding: 15px;
+      border-left: 5px solid #00aef3;
+      margin: 10px 0;
     }
 
-    /* Animated Signature */
+    /* Signature */
     .signature {
       margin-top: 30px;
       padding: 10px;
       background-color: #e7f4ff;
       border-left: 5px solid #0033a0;
-      animation: fadeIn 2s ease-in-out;
     }
 
     /* Footer */
     .footer {
       text-align: center;
-      padding: 10px 20px;
+      padding: 10px;
       font-size: 12px;
       background-color: #0033a0;
       color: white;
       border-radius: 0 0 10px 10px;
     }
-
-    /* Highlight Section */
-    .info-box {
-      background-color: #f0f8ff;
-      padding: 15px;
-      border-left: 5px solid #00aef3;
-      margin: 10px 0;
-    }
   </style>
 </head>
 <body>
   <div class="email-container">
-    <!-- Citi-Themed Header with Fade-In Animation -->
+    <!-- Header -->
     <div class="header">
-      <h1>🚀 UAT Deployment Notification</h1>
-      <p>From: <strong>Citi Release Team</strong></p>
+      <h1>🌿 Branch Cut Notification</h1>
+      <p>Citi Release Team</p>
     </div>
 
     <!-- Main Content -->
     <div class="content">
       <p>Dear Team,</p>
-      <p>The deployment for the **UAT environment** of <strong>[Application/Service Name]</strong> with <strong>Release Version [X.X.X]</strong> has been completed successfully. Please find the details below:</p>
 
-      <h2>📦 Deployment Details:</h2>
+      <p>The branch cut for the upcoming release has been completed successfully. Please find the details below:</p>
+
+      <h2>📄 Branch Cut Details:</h2>
       <ul>
-        <li><strong>Application/Service:</strong> [Application/Service Name]</li>
-        <li><strong>Release Version:</strong> <span class="highlight">[X.X.X]</span></li>
-        <li><strong>Environment:</strong> UAT</li>
-        <li><strong>Deployment Date & Time:</strong> [YYYY-MM-DD, HH:MM Timezone]</li>
-        <li><strong>Deployed By:</strong> [Deployer's Name / Team]</li>
+        <li><strong>Application/Service:</strong> [Application Name]</li>
+        <li><strong>Release Version:</strong> [X.X.X]</li>
+        <li><strong>Branch Name:</strong> <span style="background-color:#e7f4ff; padding:3px 8px; border-radius:5px;">[release/X.X.X]</span></li>
+        <li><strong>Branch Cut Date & Time:</strong> [YYYY-MM-DD, HH:MM Timezone]</li>
+        <li><strong>Cutoff Completed By:</strong> [Person/Team Name]</li>
       </ul>
 
-      <h2>✅ Testing Instructions:</h2>
+      <h2>🚨 Important Reminders:</h2>
       <div class="info-box">
-        Please use the following link to access the UAT environment for testing:<br>
-        🌐 <strong>UAT Portal:</strong> <a href="[UAT_URL]" style="color: #007bff; text-decoration: none;">[UAT_URL]</a>
+        <ul>
+          <li>🔒 All new feature development should now target the <strong>next release branch</strong>.</li>
+          <li>✅ Only critical fixes should be raised against the current cut branch with appropriate approvals.</li>
+          <li>📢 Developers must merge their work before the next cut-off deadline.</li>
+        </ul>
       </div>
-
-      <p><strong>Testing Deadline:</strong> [YYYY-MM-DD, HH:MM Timezone]</p>
-
-      <h2>📝 Key Changes:</h2>
-      <ul>
-        <li>✨ <strong>New Feature:</strong> [Brief description]</li>
-        <li>🐞 <strong>Bug Fix:</strong> [Brief description]</li>
-        <li>🚀 <strong>Enhancement:</strong> [Brief description]</li>
-      </ul>
 
       <h2>📞 Support Contact:</h2>
       <p>For any issues, please reach out to:</p>
       <ul>
-        <li>👨‍💻 <strong>On-Call Engineer:</strong> [Name, Contact Info]</li>
-        <li>📧 <strong>Support Email:</strong> [Support Email ID]</li>
+        <li><strong>Release Manager:</strong> [Name, Contact Info]</li>
+        <li><strong>Support Email:</strong> <a href="mailto:[support@citi.com]" style="color: #007bff;">support@citi.com</a></li>
       </ul>
 
+     
     <div style="
   font-family: Arial, sans-serif;
   background: linear-gradient(90deg, #0033a0, #00aef3);
