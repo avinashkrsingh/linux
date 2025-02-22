@@ -2,152 +2,74 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    /* General Styles */
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f5f5f5;
-      margin: 0;
-      padding: 0;
-      color: #333;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .email-container {
-      max-width: 700px;
-      margin: 20px auto;
-      background-color: white;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    /* Header Styles */
-    .header {
-      background-color: #0033a0;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
-    .header-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 20px;
-      background-color: white;
-    }
-    /* Stylized "Citi" Text in Blue */
-    .citi-logo {
-      font-size: 32px;
-      font-weight: bold;
-      font-family: 'Arial', sans-serif;
-      color: #0033a0;
-      position: relative;
-    }
-    .citi-logo::before {
-      content: '';
-      position: absolute;
-      top: -8px;
-      left: 0;
-      width: 100%;
-      height: 6px;
-      background: linear-gradient(90deg, #0033a0, #00aef3);
-      border-radius: 50%;
-    }
-    /* Content Styles */
-    .content {
-      padding: 20px;
-    }
-    .highlight {
-      background-color: #d9ecff;
-      padding: 10px;
-      border-radius: 5px;
-      margin: 10px 0;
-    }
-    .button {
-      background-color: #0033a0;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 5px;
-      text-decoration: none;
-      font-weight: bold;
-      display: inline-block;
-      margin-top: 10px;
-    }
-    /* Footer Styles */
-    .footer {
-      background-color: #0033a0;
-      color: white;
-      text-align: center;
-      padding: 10px 0;
-      font-size: 14px;
-    }
-  </style>
 </head>
-<body>
+<body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5;">
 
-<!-- Main Email Container -->
-<table cellpadding="0" cellspacing="0" border="0" class="email-container">
+<!-- Email Container -->
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="700" style="margin: 20px auto; background-color: white; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
   
-  <!-- Logo Header Section -->
+  <!-- Header -->
   <tr>
-    <td class="header-content">
-      <!-- System Team Logo (Left) -->
-      <span style="font-size: 28px; font-weight: bold; color: #0033a0;">System Team</span>
-      <!-- Citi Text Logo (Right, Blue) -->
-      <span class="citi-logo">Citi</span>
+    <td style="background-color: #0033a0; color: white; text-align: center; padding: 30px 20px;">
+      <h1 style="margin: 0; font-size: 32px;">🌿 Branch Cut Notification</h1>
+      <p style="font-size: 18px; margin: 5px 0 0; color: #ff3a30;">Citi Release Team</p>
     </td>
   </tr>
 
-  <!-- Main Header -->
+  <!-- Main Content -->
   <tr>
-    <td class="header">
-      <h1>✅ Application is Now Available</h1>
-      <p style="font-size: 18px; margin: 0;">Service Restoration Notification</p>
+    <td style="padding: 20px; color: #333;">
+      <p>Dear Team,</p>
+
+      <p>The branch cut for the upcoming release has been successfully completed. Please find the details below:</p>
+
+      <!-- Branch Cut Details -->
+      <h2 style="color: #007bff; border-bottom: 2px solid #0033a0; padding-bottom: 5px;">📄 Branch Cut Details:</h2>
+      <table border="0" cellpadding="5" cellspacing="0" width="100%">
+        <tr><td><strong>Application/Service:</strong></td><td>[Application Name]</td></tr>
+        <tr><td><strong>Release Version:</strong></td><td>[X.X.X]</td></tr>
+        <tr><td><strong>Branch Name:</strong></td><td style="background-color:#e7f4ff; padding:3px 8px; border-radius:5px;">release/X.X.X</td></tr>
+        <tr><td><strong>Branch Cut Date & Time:</strong></td><td>[YYYY-MM-DD, HH:MM Timezone]</td></tr>
+        <tr><td><strong>Cutoff Completed By:</strong></td><td>[Person/Team Name]</td></tr>
+      </table>
+
+      <!-- Important Reminders -->
+      <h2 style="color: #007bff; border-bottom: 2px solid #0033a0; padding-bottom: 5px;">🚨 Important Reminders:</h2>
+      <table border="0" cellpadding="10" cellspacing="0" width="100%" style="background-color: #e7f4ff; border-left: 5px solid #00aef3; margin: 10px 0;">
+        <tr><td>🔒 All new feature development should now target the <strong>next release branch</strong>.</td></tr>
+        <tr><td>✅ Only critical fixes should be raised against the current cut branch with appropriate approvals.</td></tr>
+        <tr><td>📢 Developers must merge their work before the next cut-off deadline.</td></tr>
+      </table>
+
+      <!-- Support Contact -->
+      <h2 style="color: #007bff; border-bottom: 2px solid #0033a0; padding-bottom: 5px;">📞 Support Contact:</h2>
+      <table border="0" cellpadding="5" cellspacing="0" width="100%">
+        <tr><td><strong>Release Manager:</strong></td><td>[Name, Contact Info]</td></tr>
+        <tr><td><strong>Support Email:</strong></td><td><a href="mailto:support@citi.com" style="color: #007bff; text-decoration: none;">support@citi.com</a></td></tr>
+      </table>
+
+      <!-- Signature -->
+      <table border="0" cellpadding="10" cellspacing="0" width="100%" style="margin-top: 20px; background-color: #0033a0; color: white; border-radius: 10px;">
+        <tr>
+          <td>
+            <p style="margin: 0; font-size: 16px;">
+              Best regards,<br>
+              <strong>[Your Name]</strong><br>
+              🌟 Citi Release Team<br>
+              📞 [Contact Information]<br>
+              📧 <a href="mailto:YourEmail@citi.com" style="color: #ff3a30; text-decoration: none;">YourEmail@citi.com</a>
+            </p>
+          </td>
+        </tr>
+      </table>
+
     </td>
   </tr>
 
-  <!-- Content Section -->
+  <!-- Footer -->
   <tr>
-    <td class="content">
-      <p>Dear User,</p>
-
-      <p>We are pleased to inform you that the <strong>Citi App Service</strong> is now fully operational and accessible following the scheduled maintenance.</p>
-
-      <div class="highlight">
-        <strong>ℹ️ Service Restoration Details:</strong><br>
-        <ul>
-          <li><strong>Restored Time:</strong> Saturday, June 15, 2024, 2:00 AM UTC</li>
-          <li><strong>Reason:</strong> System upgrade completed successfully.</li>
-          <li><strong>Status:</strong> Application is fully functional and stable.</li>
-        </ul>
-      </div>
-
-      <p>You can now resume normal operations. If you encounter any issues, please reach out to the support team for assistance.</p>
-
-      <p>For any urgent concerns, please contact:</p>
-      <ul>
-        <li>📧 <a href="mailto:support@citi.com">support@citi.com</a></li>
-        <li>☎️ +1 (123) 456-7890</li>
-      </ul>
-
-      <p style="text-align: center; margin: 20px 0;">
-        <a href="https://status.example.com" class="button">🔍 Check System Status</a>
-      </p>
-
-      <p>Thank you for your patience and cooperation.</p>
-
-      <p>Best Regards,<br>
-      <strong>Citi IT Operations Team</strong></p>
-    </td>
-  </tr>
-
-  <!-- Footer Section -->
-  <tr>
-    <td class="footer">
-      <p>&copy; 2024 Citi IT Operations | All Rights Reserved</p>
+    <td style="text-align: center; padding: 10px; font-size: 12px; background-color: #0033a0; color: white; border-radius: 0 0 10px 10px;">
+      &copy; 2024 Citi. All rights reserved.
     </td>
   </tr>
 
