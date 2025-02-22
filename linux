@@ -1,75 +1,122 @@
 <!DOCTYPE html>
 <html>
-  <body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5;">
-    <!-- Email Container -->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #0033a0; color: white; text-align: center; padding: 30px 20px;">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* General Styles */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .email-container {
+      max-width: 700px;
+      margin: 20px auto;
+      background-color: white;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    /* Header Styles */
+    .header {
+      background-color: #ff3a30;
+      color: white;
+      padding: 30px 20px;
+      text-align: center;
+    }
+    /* Content Styles */
+    .content {
+      padding: 20px;
+    }
+    .highlight {
+      background-color: #ffeeba;
+      padding: 10px;
+      border-radius: 5px;
+      margin: 10px 0;
+    }
+    .button {
+      background-color: #0033a0;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-weight: bold;
+      display: inline-block;
+      margin-top: 10px;
+    }
+    /* Footer Styles */
+    .footer {
+      background-color: #0033a0;
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Main Email Container -->
+<table cellpadding="0" cellspacing="0" border="0" class="email-container">
+  
+  <!-- Header Section -->
   <tr>
-    <td>
-      <h1 style="margin: 0; font-size: 32px; text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);">
-        🚀 Deployment Request
-      </h1>
-      <p style="font-size: 18px; margin: 5px 0 0; color: #ff3a30;">
-        Citi Release & DevOps Team
-      </p>
+    <td class="header">
+      <h1>🚧 Application Downtime Notification</h1>
+      <p style="font-size: 18px; margin: 0;">Important Service Alert</p>
     </td>
   </tr>
+
+  <!-- Content Section -->
+  <tr>
+    <td class="content">
+      <p>Dear User,</p>
+
+      <p>We would like to inform you that the <strong>Citi App Service</strong> will be temporarily unavailable due to scheduled maintenance. During this period, users will not be able to access the application.</p>
+
+      <div class="highlight">
+        <strong>📅 Downtime Schedule:</strong><br>
+        <ul>
+          <li><strong>Start Time:</strong> Friday, June 14, 2024, 10:00 PM UTC</li>
+          <li><strong>Expected End Time:</strong> Saturday, June 15, 2024, 2:00 AM UTC</li>
+          <li><strong>Reason:</strong> System upgrade and performance improvements.</li>
+        </ul>
+      </div>
+
+      <p>We apologize for any inconvenience this may cause and appreciate your understanding. Our team is working to ensure a smooth transition, and we will notify you once the application is back online.</p>
+
+      <p>For any urgent concerns, please contact the support team:</p>
+      <ul>
+        <li>📧 <a href="mailto:support@citi.com">support@citi.com</a></li>
+        <li>☎️ +1 (123) 456-7890</li>
+      </ul>
+
+      <p style="text-align: center; margin: 20px 0;">
+        <a href="https://status.example.com" class="button">🔍 Check System Status</a>
+      </p>
+
+      <p>Thank you for your patience and cooperation.</p>
+
+      <p>Best Regards,<br>
+      <strong>Citi IT Operations Team</strong></p>
+    </td>
+  </tr>
+
+  <!-- Footer Section -->
+  <tr>
+    <td class="footer">
+      <p>&copy; 2024 Citi IT Operations | All Rights Reserved</p>
+    </td>
+  </tr>
+
 </table>
 
-      <!-- Main Content -->
-      <div style="padding: 20px; color: #333;">
-        <p>Dear DevOps Team,</p>
-        <p>Please find below the details for the requested deployment:</p>
-
-        <!-- Deployment Details -->
-        <h2 style="color: #007bff; border-bottom: 2px solid #0033a0; padding-bottom: 5px;">📄 Deployment Request Details:</h2>
-        <ul>
-          <li><strong>Application/Service Name:</strong> [Application Name]</li>
-          <li><strong>Environment:</strong> [DEV / UAT / PROD]</li>
-          <li><strong>Release Version:</strong> [X.X.X]</li>
-          <li><strong>Branch Name:</strong> <span style="background-color:#e7f4ff; padding:3px 8px; border-radius:5px;">[release/X.X.X]</span></li>
-          <li><strong>Deployment Date & Time:</strong> [YYYY-MM-DD, HH:MM Timezone]</li>
-          <li><strong>Requester:</strong> [Requester Name]</li>
-        </ul>
-
-        <!-- Change Request Details -->
-        <h2 style="color: #007bff; border-bottom: 2px solid #0033a0; padding-bottom: 5px;">📜 Change Request (CR) Details:</h2>
-        <ul>
-          <li><strong>CR ID:</strong> [CR-XXXX]</li>
-          <li><strong>CR Description:</strong> [Brief Description]</li>
-          <li><strong>Approval Status:</strong> ✅ Approved</li>
-        </ul>
-
-        <!-- Deployment Instructions -->
-        <h2 style="color: #007bff; border-bottom: 2px solid #0033a0; padding-bottom: 5px;">🔑 Deployment Instructions:</h2>
-        <div style="background-color: #e7f4ff; padding: 15px; border-left: 5px solid #00aef3; margin: 10px 0;">
-          <ul>
-            <li><strong>Build Artifact:</strong> [Path to Build/Artifact]</li>
-            <li><strong>Configuration:</strong> [Any config changes]</li>
-            <li><strong>Rollback Plan:</strong> [Steps to Rollback]</li>
-          </ul>
-        </div>
-
-        <!-- Support Contact -->
-        <h2 style="color: #007bff; border-bottom: 2px solid #0033a0; padding-bottom: 5px;">📞 Support Contact:</h2>
-        <ul>
-          <li><strong>Deployment Owner:</strong> [Name, Contact Info]</li>
-          <li><strong>On-Call Engineer:</strong> [Name, Contact Info]</li>
-        </ul>
-
-        <!-- Signature -->
-        <div style="margin-top: 30px; padding: 10px; background-color: #e7f4ff; border-left: 5px solid #0033a0;">
-          <p><strong>Best regards,</strong><br>
-            [Your Name] <br>
-            Citi Release Team <br>
-            📧 <a href="mailto:[yourname@citi.com]" style="color: #0033a0; text-decoration: none;">yourname@citi.com</a>
-          </p>
-        </div>
-      </div>
-
-      <!-- Footer -->
-      <div style="text-align: center; padding: 10px; font-size: 12px; background-color: #0033a0; color: white; border-radius: 0 0 10px 10px;">
-      
-      </div>
-    </div>
-  </body>
+</body>
 </html>
