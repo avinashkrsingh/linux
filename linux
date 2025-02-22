@@ -1,139 +1,70 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    /* General Email Style */
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f5f5f5;
-    }
-    .email-container {
-      width: 700px;
-      margin: 20px auto;
-      background-color: white;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-    }
+  <body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5;">
+    <!-- Email Container -->
+    <div style="width: 700px; margin: 20px auto; background-color: white; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); overflow: hidden;">
 
-    /* Citi-Themed Header */
-    .header {
-      background: linear-gradient(90deg, #0033a0, #00aef3);
-      color: white;
-      text-align: center;
-      padding: 30px 20px;
-    }
-
-    .header h1 {
-      margin: 0;
-      font-size: 32px;
-      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
-    }
-
-    .header p {
-      font-size: 18px;
-      margin: 5px 0 0;
-      color: #ff3a30;
-    }
-
-    /* Main Content */
-    .content {
-      padding: 20px;
-      color: #333;
-    }
-
-    h2 {
-      color: #007bff;
-      border-bottom: 2px solid #0033a0;
-      padding-bottom: 5px;
-    }
-
-    /* Highlight Box */
-    .info-box {
-      background-color: #e7f4ff;
-      padding: 15px;
-      border-left: 5px solid #00aef3;
-      margin: 10px 0;
-    }
-
-    /* Signature */
-    .signature {
-      margin-top: 30px;
-      padding: 10px;
-      background-color: #e7f4ff;
-      border-left: 5px solid #0033a0;
-    }
-
-    /* Footer */
-    .footer {
-      text-align: center;
-      padding: 10px;
-      font-size: 12px;
-      background-color: #0033a0;
-      color: white;
-      border-radius: 0 0 10px 10px;
-    }
-  </style>
-</head>
-<body>
-  <div class="email-container">
-    <!-- Header -->
-    <div class="header">
-      <h1>🌿 Branch Cut Notification</h1>
-      <p>Citi Release Team</p>
-    </div>
-
-    <!-- Main Content -->
-    <div class="content">
-      <p>Dear Team,</p>
-
-      <p>The branch cut for the upcoming release has been completed successfully. Please find the details below:</p>
-
-      <h2>📄 Branch Cut Details:</h2>
-      <ul>
-        <li><strong>Application/Service:</strong> [Application Name]</li>
-        <li><strong>Release Version:</strong> [X.X.X]</li>
-        <li><strong>Branch Name:</strong> <span style="background-color:#e7f4ff; padding:3px 8px; border-radius:5px;">[release/X.X.X]</span></li>
-        <li><strong>Branch Cut Date & Time:</strong> [YYYY-MM-DD, HH:MM Timezone]</li>
-        <li><strong>Cutoff Completed By:</strong> [Person/Team Name]</li>
-      </ul>
-
-      <h2>🚨 Important Reminders:</h2>
-      <div class="info-box">
-        <ul>
-          <li>🔒 All new feature development should now target the <strong>next release branch</strong>.</li>
-          <li>✅ Only critical fixes should be raised against the current cut branch with appropriate approvals.</li>
-          <li>📢 Developers must merge their work before the next cut-off deadline.</li>
-        </ul>
+      <!-- Header with Citi-Themed Gradient -->
+      <div style="background: #0033a0; background: linear-gradient(90deg, #0033a0, #00aef3); color: white; text-align: center; padding: 30px 20px;">
+        <h1 style="margin: 0; font-size: 32px; text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);">🚀 Deployment Request</h1>
+        <p style="font-size: 18px; margin: 5px 0 0; color: #ff3a30;">Citi Release & DevOps Team</p>
       </div>
 
-      <h2>📞 Support Contact:</h2>
-      <p>For any issues, please reach out to:</p>
-      <ul>
-        <li><strong>Release Manager:</strong> [Name, Contact Info]</li>
-        <li><strong>Support Email:</strong> <a href="mailto:[support@citi.com]" style="color: #007bff;">support@citi.com</a></li>
-      </ul>
+      <!-- Main Content -->
+      <div style="padding: 20px; color: #333;">
+        <p>Dear DevOps Team,</p>
+        <p>Please find below the details for the requested deployment:</p>
 
-     
-    <div style="
-  font-family: Arial, sans-serif;
-  background: linear-gradient(90deg, #0033a0, #00aef3);
-  color: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  animation: fadeIn 2s ease-in-out;
-  margin-top: 20px;
-">
-  <p style="margin: 0; font-size: 16px;">
-    Best regards, <br>
-    <strong>[Your Name]</strong> <br>
-    🌟 Citi Release Team <br>
-    📞 [Contact Information] <br>
-    📧 <a href="mailto:[YourEmail@citi.com]" style="color: #ff3a30; text-decoration: none;">[YourEmail@citi.com]</a>
-  </p>
-</div>
-</body>
+        <!-- Deployment Details -->
+        <h2 style="color: #007bff; border-bottom: 2px solid #0033a0; padding-bottom: 5px;">📄 Deployment Request Details:</h2>
+        <ul>
+          <li><strong>Application/Service Name:</strong> [Application Name]</li>
+          <li><strong>Environment:</strong> [DEV / UAT / PROD]</li>
+          <li><strong>Release Version:</strong> [X.X.X]</li>
+          <li><strong>Branch Name:</strong> <span style="background-color:#e7f4ff; padding:3px 8px; border-radius:5px;">[release/X.X.X]</span></li>
+          <li><strong>Deployment Date & Time:</strong> [YYYY-MM-DD, HH:MM Timezone]</li>
+          <li><strong>Requester:</strong> [Requester Name]</li>
+        </ul>
+
+        <!-- Change Request Details -->
+        <h2 style="color: #007bff; border-bottom: 2px solid #0033a0; padding-bottom: 5px;">📜 Change Request (CR) Details:</h2>
+        <ul>
+          <li><strong>CR ID:</strong> [CR-XXXX]</li>
+          <li><strong>CR Description:</strong> [Brief Description]</li>
+          <li><strong>Approval Status:</strong> ✅ Approved</li>
+        </ul>
+
+        <!-- Deployment Instructions -->
+        <h2 style="color: #007bff; border-bottom: 2px solid #0033a0; padding-bottom: 5px;">🔑 Deployment Instructions:</h2>
+        <div style="background-color: #e7f4ff; padding: 15px; border-left: 5px solid #00aef3; margin: 10px 0;">
+          <ul>
+            <li><strong>Build Artifact:</strong> [Path to Build/Artifact]</li>
+            <li><strong>Configuration:</strong> [Any config changes]</li>
+            <li><strong>Rollback Plan:</strong> [Steps to Rollback]</li>
+          </ul>
+        </div>
+
+        <!-- Support Contact -->
+        <h2 style="color: #007bff; border-bottom: 2px solid #0033a0; padding-bottom: 5px;">📞 Support Contact:</h2>
+        <ul>
+          <li><strong>Deployment Owner:</strong> [Name, Contact Info]</li>
+          <li><strong>On-Call Engineer:</strong> [Name, Contact Info]</li>
+        </ul>
+
+        <!-- Signature -->
+        <div style="margin-top: 30px; padding: 10px; background-color: #e7f4ff; border-left: 5px solid #0033a0;">
+          <p><strong>Best regards,</strong><br>
+            [Your Name] <br>
+            Citi Release Team <br>
+            📧 <a href="mailto:[yourname@citi.com]" style="color: #0033a0; text-decoration: none;">yourname@citi.com</a>
+          </p>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div style="text-align: center; padding: 10px; font-size: 12px; background-color: #0033a0; color: white; border-radius: 0 0 10px 10px;">
+      
+      </div>
+    </div>
+  </body>
 </html>
