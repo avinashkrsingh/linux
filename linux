@@ -1,1 +1,133 @@
--Dcom.sun.net.ssl.checkRevocation=false -Djavax.net.ssl.trustStoreType=JKS
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    /* General Email Style */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+    }
+    .email-container {
+      width: 700px;
+      margin: 20px auto;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    /* Citi-Themed Header */
+    .header {
+      background: linear-gradient(90deg, #0033a0, #00aef3);
+      color: white;
+      text-align: center;
+      padding: 30px 20px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 32px;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+    }
+
+    .header p {
+      font-size: 18px;
+      margin: 5px 0 0;
+      color: #ff3a30;
+    }
+
+    /* Main Content */
+    .content {
+      padding: 20px;
+      color: #333;
+    }
+
+    h2 {
+      color: #007bff;
+      border-bottom: 2px solid #0033a0;
+      padding-bottom: 5px;
+    }
+
+    /* Highlight Box */
+    .info-box {
+      background-color: #e7f4ff;
+      padding: 15px;
+      border-left: 5px solid #00aef3;
+      margin: 10px 0;
+    }
+
+    /* Signature */
+    .signature {
+      margin-top: 30px;
+      padding: 10px;
+      background-color: #e7f4ff;
+      border-left: 5px solid #0033a0;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 10px;
+      font-size: 12px;
+      background-color: #0033a0;
+      color: white;
+      border-radius: 0 0 10px 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <!-- Header -->
+    <div class="header">
+      <h1>🚀 Go-Live Alert: [Application Name]</h1>
+      <p>Release & Deployment Team</p>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+      <p>Dear Team,</p>
+
+      <p>We are thrilled to announce that <strong>[Application Name]</strong> has been successfully deployed and is now **LIVE**.</p>
+
+      <h2>📄 Go-Live Details:</h2>
+      <ul>
+        <li><strong>Application/Service:</strong> [Application Name]</li>
+        <li><strong>Release Version:</strong> [X.X.X]</li>
+        <li><strong>Go-Live Date & Time:</strong> [YYYY-MM-DD, HH:MM Timezone]</li>
+        <li><strong>Deployed By:</strong> [Person/Team Name]</li>
+        <li><strong>Production Environment URL:</strong> <a href="[URL]" style="color: #007bff;">[URL]</a></li>
+      </ul>
+
+      <h2>🚨 Key Updates & Enhancements:</h2>
+      <div class="info-box">
+        <ul>
+          <li>✨ <strong>Feature 1:</strong> Brief description of key enhancement</li>
+          <li>🔧 <strong>Bug Fix:</strong> Summary of major fixes</li>
+          <li>📢 <strong>Improvement:</strong> Performance or security upgrade</li>
+        </ul>
+      </div>
+
+      <h2>📞 Support Contact:</h2>
+      <p>For any issues, please reach out to:</p>
+      <ul>
+        <li><strong>Support Team:</strong> [Name, Contact Info]</li>
+        <li><strong>Helpdesk:</strong> <a href="mailto:[support@citi.com]" style="color: #007bff;">support@citi.com</a></li>
+      </ul>
+
+      <div class="signature">
+        <p>Best regards,</p>
+        <p><strong>[Your Name]</strong></p>
+        <p>📌 Citi Release Team</p>
+        <p>📧 <a href="mailto:[YourEmail@citi.com]" style="color: #007bff;">[YourEmail@citi.com]</a></p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      &copy; 2024 Release & Deployment Team. All Rights Reserved.
+    </div>
+  </div>
+</body>
+</html>
