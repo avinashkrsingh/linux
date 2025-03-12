@@ -1,1 +1,19 @@
-🚀 Process Improvement Announcements
+import groovy.json.JsonSlurper
+
+def githubRepo = "your-org/your-repo"  // Replace with your GitHub repo
+def apiUrl = "https://api.github.com/repos/${githubRepo}/branches"
+def latestBranches = []
+
+try {
+    def connection = new URL(apiUrl).openConnection()
+    connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
+    def response = new JsonSlurper().parse(connection.getInputStream())
+
+    // Get latest 2 branches
+    latestBranches = response.collect { it.name }.take(2)
+
+} catch (Exception e) {
+    latestBranches = ["Error fetching branches"]
+}
+
+return latestBranches
