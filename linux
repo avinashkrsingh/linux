@@ -1,10 +1,10 @@
  - name: set-version
           image: maven:3.8.5-openjdk-11
-          script: |
-            #!/bin/sh
-            VERSION=$(cat /workspace/source/version.txt)
-            echo "Updating project version to $VERSION"
-            mvn versions:set -DnewVersion=$VERSION -DgenerateBackupPoms=false
+script: |
+        #!/bin/sh
+        export DATE_VERSION=$(date +'%Y%m%d')
+        echo "New version: 1.0.${DATE_VERSION}" 
+        echo "1.0.${DATE_VERSION}" > /workspace/version.txt
 
 
     - name: set-version
