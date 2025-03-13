@@ -1,19 +1,31 @@
-import groovy.json.JsonSlurper
+#!/bin/bash
 
-def githubRepo = "your-org/your-repo"  // Replace with your GitHub repo
-def apiUrl = "https://api.github.com/repos/${githubRepo}/branches"
-def latestBranches = []
+# OpenShift Project & Pod Name
+NAMESPACE="your-namespace"
+POD_NAME="your-pod-name"
 
-try {
-    def connection = new URL(apiUrl).openConnection()
-    connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
-    def response = new JsonSlurper().parse(connection.getInputStream())
+# Email Configuration
+EMAIL_TO="recipient@example.com"
+EMAIL_SUBJECT="🚀 OpenShift Pod is Up!"
+SMTP_SERVER="your-smtp-server"
+SMTP_PORT="587"
+EMAIL_FROM="openshift-monitor@example.com"
 
-    // Get latest 2 branches
-    latestBranches = response.collect { it.name }.take(2)
-
-} catch (Exception e) {
-    latestBranches = ["Error fetching branches"]
+# Function to Send Email
+send_email() {
+    echo -e "Subject: $EMAIL_SUBJECT\n\nThe pod $POD_NAME is now up and running in $NAMESPACE." \
+    | sendmail -S $SMTP_SERVER -f "$EMAIL_FROM" -t "$EMAIL_TO"
 }
 
-return latestBranches
+# Wait for the Pod to be in "Running" state
+while true; do
+    STATUS=$(oc get pod -n $NAMESPACE $POD_NAME -o jsonpath='{.status.phase}')
+    if [[ "$STATUS" == "Running" ]]; then
+        echo "✅ $POD_NAME is now running. Sending email..."
+        send_email
+        break
+    else
+        echo "⏳ Waiting for $POD_NAME to be up..."
+        sleep 10  # Check every 10 seconds
+    fi
+done
