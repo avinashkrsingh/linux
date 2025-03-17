@@ -1,16 +1,137 @@
- - name: set-version
-          image: maven:3.8.5-openjdk-11
-script: |
-        #!/bin/sh
-        export DATE_VERSION=$(date +'%Y%m%d')
-        echo "New version: 1.0.${DATE_VERSION}" 
-        echo "1.0.${DATE_VERSION}" > /workspace/version.txt
+#!/bin/sh
+
+# Wait for all pods to be ready
+while [[ $(oc get pods -n my-namespace --no-headers | grep -v "Running" | wc -l) -ne 0 ]]; do
+  echo "Waiting for all pods to be up..."
+  sleep 10
+done
+
+# Send email notification
+echo "Subject: 🚀 OpenShift Deployment Completed
+Content-Type: text/html
+
+$(cat /path/to/email_template.html)" | mailx -v -s "OpenShift Deployment - All Pods Up ✅" recipient@example.com
 
 
-    - name: set-version
-      image: maven:3.8.5-openjdk-11
-      script: |
-        #!/bin/sh
-        VERSION=$(cat /workspace/source/version.txt)
-        echo "Updating project version to $VERSION"
-        mvn versions:set -DnewVersion=$VERSION -DgenerateBackupPoms=false
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .header {
+      background-color: #007bff;
+      color: white;
+      padding: 15px;
+      font-size: 20px;
+      font-weight: bold;
+      border-radius: 10px 10px 0 0;
+    }
+
+    .content {
+      text-align: left;
+      padding: 15px;
+      color: #333;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 10px;
+      font-size: 12px;
+      background-color: #007bff;
+      color: white;
+      border-radius: 0 0 10px 10px;
+    }
+
+    .success {
+      color: green;
+      font-weight: bold;
+    }
+
+    .info {
+      background: #e7f4ff;
+      padding: 10px;
+      border-left: 4px solid #007bff;
+      margin-top: 10px;
+    }
+
+    /* Outlook compatibility fix */
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    td {
+      padding: 10px;
+      border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <!-- Header -->
+    <div class="header">
+      🚀 OpenShift Deployment Update
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <p>Dear Team,</p>
+      <p>The OpenShift deployment has been completed successfully, and all pods are now <span class="success">UP & RUNNING ✅</span>.</p>
+
+      <!-- Status Table -->
+      <table>
+        <tr>
+          <td><strong>📌 Project</strong></td>
+          <td>OpenShift Production</td>
+        </tr>
+        <tr>
+          <td><strong>🌍 Namespace</strong></td>
+          <td>{{ NAMESPACE }}</td>
+        </tr>
+        <tr>
+          <td><strong>⏳ Deployment Time</strong></td>
+          <td>{{ TIMESTAMP }}</td>
+        </tr>
+        <tr>
+          <td><strong>✅ Pods Running</strong></td>
+          <td>All services operational</td>
+        </tr>
+      </table>
+
+      <!-- Graphical Representation -->
+      <p>🎯 Deployment Efficiency Improvement:</p>
+      <img src="cid:deployment_chart" alt="Deployment Efficiency Graph" width="100%" style="border-radius: 10px;">
+
+      <p>You can verify the deployment status in OpenShift using the following command:</p>
+      <pre style="background-color: #f0f0f0; padding: 10px; border-radius: 5px;">oc get pods -n {{ NAMESPACE }}</pre>
+
+      <p>If you experience any issues, please contact the DevOps team.</p>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      Best Regards,<br>
+      <strong>DevOps Team 🚀</strong>
+    </div>
+
+  </div>
+</body>
+</html>
