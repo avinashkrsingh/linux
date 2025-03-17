@@ -1,1 +1,4 @@
-echo "<html><body><h3>Deployment Successful</h3><p>All pods are running!</p></body></html>" | mail -s "🚀 OpenShift Deployment Success" -a "Content-Type: text/html" recipient@example.com
+curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
+tar -xvzf oc.tar.gz
+sudo mv oc /usr/local/bin/
+oc version
