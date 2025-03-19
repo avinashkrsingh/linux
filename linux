@@ -1,32 +1,6 @@
-#!/bin/sh
-
-EMAIL_SUBJECT="🚀 OpenShift Deployment Success Notification"
-EMAIL_TO="recipient@example.com"
-EMAIL_FROM="sender@example.com"
-
-EMAIL_BODY=$(cat <<EOF
-<html>
-<head>
-    <style>
-        body { font-family: Arial, sans-serif; color: #333; }
-        .container { padding: 10px; border: 1px solid #ddd; border-radius: 5px; background: #f9f9f9; }
-        .header { background: #007bff; color: white; padding: 10px; font-size: 18px; border-radius: 5px 5px 0 0; }
-        .footer { font-size: 12px; margin-top: 10px; color: #666; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">✅ OpenShift Deployment Success</div>
-        <p>Dear Team,</p>
-        <p>The OpenShift deployment has been successfully completed.</p>
-        <p><strong>Environment:</strong> INT</p>
-        <p><strong>Timestamp:</strong> $(date)</p>
-        <p>For more details, check the logs in OpenShift.</p>
-        <div class="footer">This is an automated notification from OpenShift.</div>
-    </div>
-</body>
-</html>
-EOF
-)
-
-echo -e "From: $EMAIL_FROM\nTo: $EMAIL_TO\nSubject: $EMAIL_SUBJECT\nMIME-Version: 1.0\nContent-Type: text/html\n\n$EMAIL_BODY" | mail -s "$EMAIL_SUBJECT" "$EMAIL_TO"
+ Risks & Mitigation Strategies
+Risk	Impact	Mitigation
+Breaking UI Changes	Layouts may shift due to grid updates	Perform thorough UI testing before deployment
+JavaScript Errors	jQuery-based scripts will break	Refactor to vanilla JS or use Bootstrap 5 native JavaScript
+CSS Conflicts	Removed/renamed classes may cause styling issues	Update custom styles and use new Bootstrap utilities
+Plugin Compatibility	Third-party libraries relying on Bootstrap 4 may break	Verify compatibility and upgrade dependencies
