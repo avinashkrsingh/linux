@@ -4,3 +4,11 @@ EMAIL_FROM="sender@example.com"
 EMAIL_BODY="<html><body><h2>Deployment Successful</h2><p>The OpenShift deployment is complete.</p></body></html>"
 
 printf "From: $EMAIL_FROM\nTo: $EMAIL_TO\nSubject: $EMAIL_SUBJECT\nMIME-Version: 1.0\nContent-Type: text/html\n\n$EMAIL_BODY" | sendmail -t
+
+EMAIL_SUBJECT="Deployment Notification"
+EMAIL_TO="recipient@example.com"
+EMAIL_FROM="sender@example.com"
+EMAIL_BODY="<html><body><h2>Deployment Successful</h2><p>The OpenShift deployment is complete.</p></body></html>"
+
+echo -e "From: $EMAIL_FROM\nTo: $EMAIL_TO\nSubject: $EMAIL_SUBJECT\nMIME-Version: 1.0\nContent-Type: text/html\n\n$EMAIL_BODY" | mail -s "$EMAIL_SUBJECT" "$EMAIL_TO"
+
