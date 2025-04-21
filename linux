@@ -1,1 +1,12 @@
 
+<Context docBase="/opt/resources/custom-images" path="/custom-images" reloadable="true" />
+
+<servlet>
+    <servlet-name>customImageServlet</servlet-name>
+    <jsp-file>/images/*</jsp-file>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>customImageServlet</servlet-name>
+    <url-pattern>/custom-images/*</url-pattern>
+</servlet-mapping>
