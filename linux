@@ -1,25 +1,29 @@
-This initiative focuses on modernizing our development and deployment ecosystem by:
+📘 Year 1: Strengthening Release Foundations
 
-Migrating the LSE and NGC clients to newer, scalable infrastructure aligned with current standards.
+Establish consistent, reliable release processes across environments
 
-Transitioning all repositories from Bitbucket to GitHub, streamlining source control and enabling enhanced DevOps automation.
+Deepen expertise in CI/CD tools, GitOps practices, and pipeline management
 
-Standardizing CI/CD pipelines for both legacy and modernized clients.
+Ensure environment parity and minimize post-deployment issues
 
-Ensuring minimal downtime and thorough regression coverage during migration activities.
+Integrate security checks (SNYK, CheckMark) and compliance validations into pipelines
 
-Key Goals:
+📈 Year 2: Leading Initiatives & Cross-Team Coordination
 
-Improve maintainability and performance of client platforms.
+Drive release readiness across squads by improving planning and handoffs
 
-Enable seamless integration with our modern GitHub workflows.
+Champion automation of version control, artifact management, and rollback procedures
 
-Decommission redundant infrastructure.
+Create visibility dashboards to track release frequency, failure rates, and MTTR
 
-Deliverables:
+Act as the single point of coordination between Dev, QA, DevSecOps, and Product for releases
 
-Fully migrated LSE & NGC codebases.
+🧭 Year 3: Strategic Enablement & Release Governance
 
-All active repos live and validated on GitHub.
+Own the enterprise-level release calendar with risk-aware deployment planning
 
-Dev and QA workflows operational post-migration.
+Introduce release governance models and readiness checklists (EOL/EOVS, VA scans, etc.)
+
+Lead initiatives to improve business continuity through controlled rollout strategies (blue-green, canary)
+
+Mentor and grow the next generation of release engineers
