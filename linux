@@ -1,104 +1,46 @@
-Key Strengths to Continue Leveraging
-🔁 Process-Oriented Mindset
+#!/bin/bash
 
-You consistently ensure repeatable, auditable, and efficient release processes.
+# Login to OpenShift cluster (replace USER_NAME and PASSWORD)
+oc login URL -u [USER_NAME] -p [PASSWORD] --insecure-skip-tls-verify=true > /dev/null
 
-Strong at identifying bottlenecks and implementing automation to optimize release cycles.
+# Output file
+output_file="/home/SOEID/scripts/pods_data.html"
 
-🔒 Security & Compliance Awareness
+# Start HTML
+cat <<EOF > "$output_file"
+<html>
+<head><style>
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid #ddd; padding: 8px; }
+th { background-color: #f2f2f2; }
+</style></head>
+<body>
+<h3>Production PODs Status Report</h3>
+<table>
+<tr><th>Name</th><th>Ready</th><th>Status</th><th>Restarts</th><th>Age</th></tr>
+EOF
 
-Proactive in integrating tools like SNYK, VA, and CheckMark to identify risks early.
+# Append pod data
+oc get pods --no-headers | grep Running | awk '{print "<tr><td>"$1"</td><td>"$2"</td><td>"$3"</td><td>"$4"</td><td>"$5"</td></tr>"}' >> "$output_file"
 
-You understand the impact of EOL/EOVS and always plan mitigations ahead of time.
+# End table and add image section
+echo "</table><br><h4>Image Versions Used</h4><ul>" >> "$output_file"
 
-🤝 Cross-Functional Collaboration
+# Get image versions
+for pod in $(oc get pods --no-headers | grep Running | awk '{print $1}'); do
+  image=$(oc describe pod "$pod" | grep 'Image:' | head -1 | awk '{print $2}')
+  echo "<li><b>$pod</b>: $image</li>" >> "$output_file"
+done
 
-Comfortable coordinating across Dev, QA, DevOps, and Product teams.
+# End HTML
+echo "</ul></body></html>" >> "$output_file"
 
-Act as the glue between delivery teams and stakeholders, especially during critical releases.
+# Send mail in HTML format
+subject="ECS_ALERT: PRODUCTION PODS STATUS"
+to=""
+from="ECSDeployment_"
 
-🧠 Strong Technical Acumen
+cat "$output_file" | mailx -a "Content-Type: text/html" -s "$subject" -r "$from" $to
 
-Hands-on with CI/CD tools, scripting, infrastructure config, and version control systems.
-
-Able to debug issues quickly and drive fast resolutions in high-pressure situations.
-
-📊 Attention to Metrics & Improvement
-
-You track and act on key KPIs like deployment frequency, failure rates, and lead time.
-
-Data-driven decisions are a hallmark of your approach.
-
-🗣️ Clear Communication Under Pressure
-
-Capable of articulating complex issues clearly to both technical and non-technical audiences.
-
-You help build trust during go/no-go decisions, incident response, and planning meetings.
-
-
-🧭 Strategic Alignment & Clarity
-
-Clear visibility into product roadmaps and business priorities so release planning aligns with goals.
-
-Early involvement in discussions around major initiatives, migrations, or platform shifts.
-
-👥 Cross-Team Empowerment
-
-Support in driving accountability across dev, QA, security, and infra teams for timely handoffs.
-
-Help in reinforcing the importance of release readiness and ownership across teams.
-
-🛠️ Resource Planning & Tooling
-
-Backing for investment in better automation, release tools, and observability dashboards.
-
-Allocation of resources for critical release-related activities like environment setup, rollback testing, and resilience validation.
-
-🚧 Escalation Management
-
-Assistance in resolving cross-team blockers or escalations that impact release timelines.
-
-Advocating for realistic timelines when last-minute scope creep threatens stability.
-
-📈 Growth & Leadership Development
-
-Opportunities to contribute to org-level initiatives (e.g., release governance, center of excellence).
-
-Mentorship and support in strengthening people leadership and program management skills.
-
-Key Development Questions (KDQs)
-🧠 Self-Reflection
-What did I do well in the last release cycle, and what can I improve?
-
-Am I proactively identifying risks and dependencies early enough?
-
-How effectively am I communicating with stakeholders and cross-functional teams?
-
-🛠 Process & Efficiency
-Are our release processes repeatable and scalable?
-
-Where can automation further reduce manual intervention or error?
-
-How can we reduce lead time from code commit to production?
-
-✅ Quality & Governance
-Are our quality gates (tests, scans, validations) catching issues early enough?
-
-How are we ensuring security and compliance are embedded in the SDLC?
-
-What patterns exist in our release issues, and how can we prevent them?
-
-📈 Team & Collaboration
-Is my team clear on ownership and responsibilities at each release phase?
-
-What blockers are my team members facing regularly?
-
-How can I better support my peers, QA, and DevOps counterparts?
-
-🚀 Growth & Leadership
-What leadership qualities should I strengthen for the next level?
-
-How can I mentor or coach others in the release process?
-
-What metrics should I use to demonstrate the value of release engineering?
-
+# Logout
+oc logout > /dev/null
