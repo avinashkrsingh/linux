@@ -7,29 +7,43 @@ REPOS=(
 )
 
 BRANCHES=("sit-release" "main")
-PREFIX="1"
+PREFIX="c"
 
 for REPO in "${REPOS[@]}"; do
-  NAME=$(basename "$REPO" .git)
+  # Extract service name from repo name
+  SERVICE=$(basename "$REPO" .git)
 
   for BRANCH in "${BRANCHES[@]}"; do
-    TARGET="${PREFIX}.${NAME}-${BRANCH}"
+    FOLDER="${PREFIX}.${SERVICE}"  # clone target folder is fixed per service
+    TEMP_FOLDER="${FOLDER}-${BRANCH}"  # unique working copy per branch
 
-    echo "🔄 Cloning $REPO [$BRANCH] into $TARGET..."
-    git clone --single-branch --branch "$BRANCH" "$REPO" "$TARGET"
+    echo "🔄 Cloning [$BRANCH] of $SERVICE into $TEMP_FOLDER..."
+    git clone --single-branch --branch "$BRANCH" "$REPO" "$TEMP_FOLDER"
 
-    # Move contents from inner <repo> folder if it exists
-    if [ -d "$TARGET/$NAME" ]; then
-      echo "📦 Moving $NAME contents to $TARGET..."
+    cd "$TEMP_FOLDER" || exit 1
+
+    if [ -d "$SERVICE" ]; then
+      echo "📦 Moving contents from inner '$SERVICE' to project root..."
+
+      # Include hidden files like .env or .gitignore
       shopt -s dotglob
-      mv "$TARGET/$NAME"/* "$TARGET/"
-      rm -rf "$TARGET/$NAME"
+      mv "$SERVICE"/* ./
+      rm -rf "$SERVICE"
       shopt -u dotglob
-      echo "✅ Cleaned $TARGET/$NAME"
+
+      # Commit and push the changes
+      git add .
+      git commit -m "Flatten structure: moved '$SERVICE/' contents to root"
+      git push origin "$BRANCH"
+
+      echo "✅ Changes pushed for $SERVICE [$BRANCH]"
     else
-      echo "⚠️ No inner folder $TARGET/$NAME found — skipping move"
+      echo "⚠️ Inner folder '$SERVICE' not found in $TEMP_FOLDER — skipping flattening"
     fi
+
+    cd ..
+    rm -rf "$TEMP_FOLDER"  # Optional: clean up cloned folder after push
   done
 done
 
-echo "✅ All repositories and branches processed."
+echo "🎉 All service branches processed and updated."
