@@ -1,49 +1,20 @@
-#!/bin/bash
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Swagger UI</title>
+  <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist/swagger-ui.css" />
+</head>
+<body>
+  <div id="swagger-ui"></div>
 
-# List of Git repo URLs
-REPOS=(
-  "git@github.com:your-org/service-a.git"
-  "git@github.com:your-org/service-b.git"
-)
-
-BRANCHES=("sit-release" "main")
-PREFIX="c"
-
-for REPO in "${REPOS[@]}"; do
-  # Extract service name from repo name
-  SERVICE=$(basename "$REPO" .git)
-
-  for BRANCH in "${BRANCHES[@]}"; do
-    FOLDER="${PREFIX}.${SERVICE}"  # clone target folder is fixed per service
-    TEMP_FOLDER="${FOLDER}-${BRANCH}"  # unique working copy per branch
-
-    echo "🔄 Cloning [$BRANCH] of $SERVICE into $TEMP_FOLDER..."
-    git clone --single-branch --branch "$BRANCH" "$REPO" "$TEMP_FOLDER"
-
-    cd "$TEMP_FOLDER" || exit 1
-
-    if [ -d "$SERVICE" ]; then
-      echo "📦 Moving contents from inner '$SERVICE' to project root..."
-
-      # Include hidden files like .env or .gitignore
-      shopt -s dotglob
-      mv "$SERVICE"/* ./
-      rm -rf "$SERVICE"
-      shopt -u dotglob
-
-      # Commit and push the changes
-      git add .
-      git commit -m "Flatten structure: moved '$SERVICE/' contents to root"
-      git push origin "$BRANCH"
-
-      echo "✅ Changes pushed for $SERVICE [$BRANCH]"
-    else
-      echo "⚠️ Inner folder '$SERVICE' not found in $TEMP_FOLDER — skipping flattening"
-    fi
-
-    cd ..
-    rm -rf "$TEMP_FOLDER"  # Optional: clean up cloned folder after push
-  done
-done
-
-echo "🎉 All service branches processed and updated."
+  <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
+  <script>
+    const ui = SwaggerUIBundle({
+      url: "swagger.json", // or "swagger.yaml"
+      dom_id: '#swagger-ui',
+      deepLinking: true,
+    });
+  </script>
+</body>
+</html>
