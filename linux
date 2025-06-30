@@ -2,19 +2,77 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>My Swagger UI</title>
-  <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist/swagger-ui.css" />
+  <title>API Documentation | Swagger UI</title>
+  <link rel="icon" href="https://swagger.io/img/favicon-32x32.png">
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist/swagger-ui.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #f8f9fa, #e9ecef);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    h1 {
+      color: #343a40;
+      margin-bottom: 1rem;
+    }
+
+    .launch-box {
+      text-align: center;
+      background-color: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #swagger-ui {
+      width: 90%;
+      height: 100vh;
+      display: none;
+    }
+  </style>
 </head>
 <body>
+  <div class="launch-box" id="launcher">
+    <h1>🚀 Launch API Docs</h1>
+    <p>View the interactive API reference using Swagger UI</p>
+    <button onclick="launchDocs()">View Documentation</button>
+  </div>
+
   <div id="swagger-ui"></div>
 
   <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
   <script>
-    const ui = SwaggerUIBundle({
-      url: "swagger.json", // or "swagger.yaml"
-      dom_id: '#swagger-ui',
-      deepLinking: true,
-    });
+    function launchDocs() {
+      document.getElementById('launcher').style.display = 'none';
+      document.getElementById('swagger-ui').style.display = 'block';
+
+      SwaggerUIBundle({
+        url: "swagger.json", // or "swagger.yaml"
+        dom_id: "#swagger-ui",
+        deepLinking: true,
+        layout: "BaseLayout"
+      });
+    }
   </script>
 </body>
 </html>
