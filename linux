@@ -1,78 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>API Documentation | Swagger UI</title>
-  <link rel="icon" href="https://swagger.io/img/favicon-32x32.png">
-  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist/swagger-ui.css" />
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to right, #f8f9fa, #e9ecef);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
+#!/bin/bash
 
-    h1 {
-      color: #343a40;
-      margin-bottom: 1rem;
-    }
+# List of Git repo URLs
+REPOS=(
+  "git@github.com:your-org/repo-one.git"
+  "git@github.com:your-org/repo-two.git"
+  "git@github.com:your-org/repo-three.git"
+)
 
-    .launch-box {
-      text-align: center;
-      background-color: white;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-    }
+BRANCH="sit-release"
 
-    button {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 5px;
-      font-size: 16px;
-      cursor: pointer;
-    }
+for REPO in "${REPOS[@]}"; do
+  REPO_NAME=$(basename "$REPO" .git)
 
-    button:hover {
-      background-color: #0056b3;
-    }
+  echo "🔄 Cloning $REPO_NAME..."
 
-    #swagger-ui {
-      width: 90%;
-      height: 100vh;
-      display: none;
-    }
-  </style>
-</head>
-<body>
-  <div class="launch-box" id="launcher">
-    <h1>🚀 Launch API Docs</h1>
-    <p>View the interactive API reference using Swagger UI</p>
-    <button onclick="launchDocs()">View Documentation</button>
-  </div>
+  git clone "$REPO"
+  cd "$REPO_NAME" || exit 1
 
-  <div id="swagger-ui"></div>
+  echo "🚀 Checking out branch: $BRANCH"
 
-  <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
-  <script>
-    function launchDocs() {
-      document.getElementById('launcher').style.display = 'none';
-      document.getElementById('swagger-ui').style.display = 'block';
+  # Fetch the branch in case it's not tracked
+  git fetch origin "$BRANCH"
+  git checkout "$BRANCH"
 
-      SwaggerUIBundle({
-        url: "swagger.json", // or "swagger.yaml"
-        dom_id: "#swagger-ui",
-        deepLinking: true,
-        layout: "BaseLayout"
-      });
-    }
-  </script>
-</body>
-</html>
+  cd ..
+  echo "✅ Done with $REPO_NAME"
+  echo "-----------------------------"
+done
+
+echo "🎉 All repositories cloned and checked out to '$BRANCH'."
