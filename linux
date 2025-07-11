@@ -1,31 +1,9 @@
-#!/bin/bash
+RAW_VERSION="-1234-87654321-main"
 
-# List of Git repo URLs
-REPOS=(
-  "git@github.com:your-org/repo-one.git"
-  "git@github.com:your-org/repo-two.git"
-  "git@github.com:your-org/repo-three.git"
-)
+# Extract prefix and suffix only: YYYYxxxQn-main
+CLEAN_VERSION=$(echo "$RAW_VERSION" | sed -E 's/^([0-9]{7}Q[0-9])-.*-([a-zA-Z/_-]+)$/\1-\2/')
 
-BRANCH="sit-release"
+echo "Clean version: $CLEAN_VERSION"
 
-for REPO in "${REPOS[@]}"; do
-  REPO_NAME=$(basename "$REPO" .git)
-
-  echo "🔄 Cloning $REPO_NAME..."
-
-  git clone "$REPO"
-  cd "$REPO_NAME" || exit 1
-
-  echo "🚀 Checking out branch: $BRANCH"
-
-  # Fetch the branch in case it's not tracked
-  git fetch origin "$BRANCH"
-  git checkout "$BRANCH"
-
-  cd ..
-  echo "✅ Done with $REPO_NAME"
-  echo "-----------------------------"
-done
-
-echo "🎉 All repositories cloned and checked out to '$BRANCH'."
+# Use this when running Maven
+mvn clean install -Drevision="$CLEAN_VERSION"
