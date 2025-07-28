@@ -1,46 +1,45 @@
-1. Stakeholder Alignment
-Dev, QA, Release, Infra, and Business teams informed
+#!/bin/bash
 
-RACI matrix updated
+# Usage:
+# ./run_dml.sh "UPDATE employees SET active = 'Y' WHERE dept = 'HR';"
+# ./run_dml.sh /path/to/file.sql
 
-Business sign-off or CAB approval obtained for post-COB activities
+# === Oracle DB Connection Details ===
+ORACLE_USER="your_user"
+ORACLE_PASSWORD="your_password"
+ORACLE_SID="your_sid"           # Or SERVICE_NAME
+ORACLE_HOST="your_host"
+ORACLE_PORT="1521"
 
-2. Deployment & Rollback Plans
-Detailed runbook with start/end time
+# === Forbidden keywords ===
+FORBIDDEN_KEYWORDS=("CREATE" "ALTER" "DROP" "TRUNCATE" "PACKAGE" "FUNCTION" "PROCEDURE" "BEGIN" "DECLARE")
 
-Rollback strategy clearly defined
+# === Check if input is a file ===
+if [ -f "$1" ]; then
+    SQL_CONTENT=$(cat "$1")
+    IS_FILE=true
+    FILE_PATH="$1"
+else
+    SQL_CONTENT="$1"
+    IS_FILE=false
+fi
 
-Checklist for each step including pre/post validations
+# === Convert to uppercase for case-insensitive check ===
+SQL_UPPER=$(echo "$SQL_CONTENT" | tr '[:lower:]' '[:upper:]')
 
-3. Monitoring & Support
-Application and infra monitoring activated
+# === Block if forbidden keywords are present ===
+for keyword in "${FORBIDDEN_KEYWORDS[@]}"; do
+    if echo "$SQL_UPPER" | grep -wq "$keyword"; then
+        echo "❌ Forbidden keyword detected: '$keyword' – Only DML statements are allowed."
+        exit 1
+    fi
+done
 
-On-call engineers notified and available
+# === Execute SQL using Oracle SQL*Plus ===
+echo "✅ Executing DML command..."
 
-Logging and alerts configured for new deployments
-
-4. System Health Checks
-Pre-COB environment snapshot (logs, database, etc.)
-
-Smoke test automation ready
-
-Capacity and scaling reviewed
-
-5. Communication Plan
-Status update schedule (e.g., hourly)
-
-Slack, MS Teams, or Email bridge active
-
-Contact list of escalation points
-
-🚦 When is Extended COB Readiness Needed?
-Go-live or production deployments after 6 PM
-
-Major patching or DB migration windows
-
-Data backfills or cutovers during low-load hours
-
-Coordinated deployments across global regions (e.g., GMT + IST overlap)
-
-✅ Sample One-liner Summary
-“Extended COB Readiness ensures business-critical deployments and validations can proceed safely and with full team support after standard working hours.”
+if $IS_FILE; then
+    sqlplus -s "$ORACLE_USER/$ORACLE_PASSWORD@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=$ORACLE_HOST)(PORT=$ORACLE_PORT))(CONNECT_DATA=(SID=$ORACLE_SID)))" @"$FILE_PATH"
+else
+    echo "$SQL_CONTENT" | sqlplus -s "$ORACLE_USER/$ORACLE_PASSWORD@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=$ORACLE_HOST)(PORT=$ORACLE_PORT))(CONNECT_DATA=(SID=$ORACLE_SID)))"
+fi
