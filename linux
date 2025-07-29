@@ -1,9 +1,36 @@
-RAW_VERSION="-1234-87654321-main"
+#!/bin/bash
 
-# Extract prefix and suffix only: YYYYxxxQn-main
-CLEAN_VERSION=$(echo "$RAW_VERSION" | sed -E 's/^([0-9]{7}Q[0-9])-.*-([a-zA-Z/_-]+)$/\1-\2/')
+# GitHub token (keep it safe)
+GITHUB_TOKEN="ghp_your_actual_token"
 
-echo "Clean version: $CLEAN_VERSION"
+# List of repositories (format: owner/repo)
+REPOS=(
+  "your-org/repo1"
+  "your-org/repo2"
+)
 
-# Use this when running Maven
-mvn clean install -Drevision="$CLEAN_VERSION"
+for REPO in "${REPOS[@]}"; do
+  echo "🔍 Checking latest PR in $REPO..."
+
+  # Get the latest open PR number
+  PR_DATA=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+    "https://api.github.com/repos/$REPO/pulls?state=open&sort=created&direction=desc&per_page=1")
+
+  PR_NUMBER=$(echo "$PR_DATA" | jq '.[0].number')
+
+  if [ "$PR_NUMBER" != "null" ] && [ -n "$PR_NUMBER" ]; then
+    echo "🚀 Merging PR #$PR_NUMBER in $REPO..."
+
+    # Merge the PR using the API
+    curl -s -X PUT -H "Authorization: token $GITHUB_TOKEN" \
+      -H "Content-Type: application/json" \
+      -d '{"merge_method":"merge"}' \
+      "https://api.github.com/repos/$REPO/pulls/$PR_NUMBER/merge"
+
+    echo "✅ PR #$PR_NUMBER merged in $REPO"
+  else
+    echo "⚠️ No open PRs found in $REPO"
+  fi
+
+  echo "-----------------------------"
+done
