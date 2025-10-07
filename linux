@@ -1,1 +1,10 @@
+/*
+Goal: Create an Angular component called DowntimeBannerComponent.
+Requirements:
+- Show a yellow warning banner for planned downtime.
+- Accept `startTime`, `endTime`, and `timezone` as @Input.
+- Hide automatically when end time passes.
+- Display countdown in mm:ss format.
+- Use Tailwind or minimal CSS.
+*/
 
