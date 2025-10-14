@@ -1,10 +1,37 @@
-/*
-Goal: Create an Angular component called DowntimeBannerComponent.
-Requirements:
-- Show a yellow warning banner for planned downtime.
-- Accept `startTime`, `endTime`, and `timezone` as @Input.
-- Hide automatically when end time passes.
-- Display countdown in mm:ss format.
-- Use Tailwind or minimal CSS.
-*/
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>API Documentation</title>
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist/swagger-ui.css" />
+  </head>
+  <body>
+    <div id="swagger-ui"></div>
 
+    <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
+    <script>
+      // --- Environment detection ---
+      const host = window.location.hostname;
+
+      let env = "prod";
+      if (host.includes("dev")) env = "dev";
+      else if (host.includes("staging")) env = "staging";
+
+      // --- API endpoints for each environment ---
+      const envUrls = {
+        dev: "https://api-dev.example.com/openapi.json",
+        staging: "https://api-staging.example.com/openapi.json",
+        prod: "https://api.example.com/openapi.json",
+      };
+
+      // --- Initialize Swagger UI ---
+      window.ui = SwaggerUIBundle({
+        url: envUrls[env],
+        dom_id: "#swagger-ui",
+        deepLinking: true,
+        presets: [SwaggerUIBundle.presets.apis],
+        layout: "BaseLayout",
+      });
+    </script>
+  </body>
+</html>
