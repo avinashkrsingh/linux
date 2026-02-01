@@ -1,6 +1,6 @@
 # Install Angular CLI 18 globally
 npm install -g @angular/cli@18
-^(main|(feature|hotfix)\/COFY-\d+|release\/COFY_\d{6}_S[12])$
+release/COFY_[0-9][0-9][0-9][0-9][0-9][0-9]_S[12]
 
 
 # Create a new Angular project with standalone APIs
