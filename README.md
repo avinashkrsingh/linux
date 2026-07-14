@@ -1,114 +1,87 @@
-# Install Angular CLI 18 globally
-npm install -g @angular/cli@18
-release/COFY_[0-9][0-9][0-9][0-9][0-9][0-9]_S[12]
+we have modern monolithic Services[10 services] and MFE UI - where all services points to single DB
 
+Task is to create CICD for each Services UI and DB , we already created CICD for UI and services
+only DB is tightly couple write a DB prompt  ACT as senior DB architect and separet  out the DB for each module there may be common object in DB
 
-# Create a new Angular project with standalone APIs
-ng new downtime-app --standalone --style=css --routing=false
-cd downtime-app
+ROLE: You are a Senior Database Architect with 15+ years of experience in 
+decomposing monolithic databases into microservices-aligned data stores, 
+specializing in zero-downtime migrations for high-traffic production systems.
 
-# Generate the downtime-banner component
-ng generate component downtime-banner --standalone
+CONTEXT:
+- We run a modular monolith: 10 backend services + a Micro-Frontend (MFE) UI layer.
+- All 10 services currently point to a SINGLE shared database instance.
+- CI/CD pipelines already exist and are independent for: (a) each UI/MFE module, 
+  (b) each of the 10 services.
+- The database is the last tightly-coupled component — no CI/CD, no ownership 
+  boundaries, shared schema, likely cross-service joins/FKs.
+- Goal: Decompose the DB per-service (database-per-service pattern) while 
+  correctly handling COMMON/SHARED objects (e.g., users, tenants, config, 
+  lookup/reference tables, audit logs) that multiple services depend on.
 
-# Overwrite component + app files
-cat > src/app/downtime-banner/downtime-banner.component.ts <<'EOF'
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+OBJECTIVES — produce the following as concrete deliverables:
 
-@Component({
-  selector: 'app-downtime-banner',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './downtime-banner.component.html',
-  styleUrls: ['./downtime-banner.component.css']
-})
-export class DowntimeBannerComponent implements OnInit, OnDestroy {
-  @Input() endTime!: Date;
-  isVisible = true;
-  timeLeft: string = '';
+1. DATA OWNERSHIP MATRIX
+   - Map every existing table to exactly one owning service (bounded context).
+   - Flag tables that are ambiguous or accessed by >1 service today.
+   - For each ambiguous table, classify it as one of:
+     a) Truly shared master/reference data (e.g., country codes, roles)
+     b) Duplicated-with-sync candidate (owned by one service, others get a copy)
+     c) Should be split (different services need different slices of the same table)
+     d) Should become a new "platform/core" service (e.g., Identity, Tenant, Audit)
 
-  private intervalId: any;
+2. COMMON OBJECT STRATEGY
+   For each shared object category, recommend ONE pattern with tradeoffs:
+   - Shared/core service exposing data via API or events (preferred long-term)
+   - CDC (Change Data Capture) based replication into per-service read models
+   - Event-driven eventual consistency (outbox pattern + message broker)
+   - Reference-data caching at service level with periodic sync
+   Explicitly address: Users/Auth, Tenant/Org data, Config/Feature flags, 
+   Audit/Logging, Reference/Lookup tables.
 
-  ngOnInit() {
-    this.updateCountdown();
-    this.intervalId = setInterval(() => this.updateCountdown(), 1000);
-  }
+3. FOREIGN KEY & CROSS-SERVICE JOIN ELIMINATION
+   - Identify all existing cross-service FKs and joins.
+   - Propose replacement approach: API composition, denormalization, 
+     local read-model caching, or event-carried state transfer.
+   - Define how referential integrity will be enforced without DB-level FKs 
+     (application-level checks, saga compensations, eventual consistency SLAs).
 
-  ngOnDestroy() {
-    clearInterval(this.intervalId);
-  }
+4. TRANSACTION BOUNDARY REDESIGN
+   - Identify existing multi-table transactions that span future service boundaries.
+   - Propose Saga pattern (choreography vs orchestration) per case, with 
+     compensating transactions.
 
-  private updateCountdown() {
-    const now = new Date().getTime();
-    const distance = this.endTime.getTime() - now;
+5. MIGRATION STRATEGY (PHASED, ZERO-DOWNTIME)
+   - Phase 1: Logical separation — split shared DB into per-service SCHEMAS 
+     (same physical instance), enforce access via DB users/permissions per service.
+   - Phase 2: Break cross-schema queries/FKs using patterns from #2/#3.
+   - Phase 3: Physical separation — move each schema to its own DB instance.
+   - Use expand-contract (parallel-write / dual-write with backfill / cutover / 
+     cleanup) — detail each step per table category.
+   - Include a rollback plan at every phase.
 
-    if (distance <= 0) {
-      this.isVisible = false;
-      clearInterval(this.intervalId);
-      return;
-    }
+6. CI/CD FOR DATABASE PER SERVICE
+   - Recommend migration tooling (e.g., Flyway/Liquibase) — one migration 
+     history per service DB/schema, versioned and independently deployable.
+   - Define pipeline stages: lint migration → dry-run against shadow DB → 
+     apply to staging → backward-compatibility check → apply to prod → 
+     smoke test.
+   - Enforce backward-compatible migrations only (additive first, remove in 
+     a later release) so service deploys and DB deploys can stay decoupled.
+   - Define how a service's pipeline blocks/gates if a migration breaks a 
+     consumer of shared data.
 
-    const minutes = Math.floor((distance / 1000 / 60) % 60);
-    const seconds = Math.floor((distance / 1000) % 60);
-    this.timeLeft = `${minutes}m ${seconds}s remaining`;
-  }
-}
-EOF
+7. GOVERNANCE
+   - Define a "no new cross-service FK / no new shared table without RFC" policy.
+   - Define ownership: which team can modify which schema, and how schema 
+     changes to shared/core data get reviewed by consuming teams.
 
-cat > src/app/downtime-banner/downtime-banner.component.html <<'EOF'
-<div *ngIf="isVisible" class="banner">
-  <h3>⚠️ Scheduled Downtime</h3>
-  <p>{{ timeLeft }}</p>
-</div>
-EOF
+INPUT I WILL PROVIDE:
+- Current schema (DDL or ER diagram)
+- List of 10 services and their primary responsibilities
+- Known cross-service queries/joins (if documented)
 
-cat > src/app/downtime-banner/downtime-banner.component.css <<'EOF'
-.banner {
-  background: #fff3cd;
-  color: #856404;
-  border: 1px solid #ffeeba;
-  padding: 12px;
-  text-align: center;
-  font-weight: bold;
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 1000;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-}
-EOF
-
-cat > src/app/app.component.ts <<'EOF'
-import { Component } from '@angular/core';
-import { DowntimeBannerComponent } from './downtime-banner/downtime-banner.component';
-
-@Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [DowntimeBannerComponent],
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
-})
-export class AppComponent {
-  downtimeEnd = new Date(new Date().getTime() + 5 * 60 * 1000); // 5 min countdown
-}
-EOF
-
-cat > src/app/app.component.html <<'EOF'
-<app-downtime-banner [endTime]="downtimeEnd"></app-downtime-banner>
-
-<div style="margin-top:100px; text-align:center;">
-  <h1>🚀 Welcome to Downtime App</h1>
-  <p>Your main content goes here...</p>
-</div>
-EOF
-
-cat > src/main.ts <<'EOF'
-import { bootstrapApplication } from '@angular/platform-browser';
-import { AppComponent } from './app/app.component';
-
-bootstrapApplication(AppComponent)
-  .catch(err => console.error(err));
-EOF
-
-# Run the app
-ng serve
+OUTPUT FORMAT:
+- Start with the Data Ownership Matrix as a table.
+- Then answer objectives 2–7 as structured sections with concrete recommendations, 
+  not generic theory — reference actual table/service names from the input.
+- End with a prioritized roadmap (phase, effort, risk, dependency order).
