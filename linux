@@ -1,37 +1,249 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>API Documentation</title>
-    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist/swagger-ui.css" />
-  </head>
-  <body>
-    <div id="swagger-ui"></div>
+# AI Agent Prompt: Spring Boot 3.x → 4.1 / Spring Framework 6 → 7 / JDK 17 → 21 Migration
 
-    <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
-    <script>
-      // --- Environment detection ---
-      const host = window.location.hostname;
+## ROLE
 
-      let env = "prod";
-      if (host.includes("dev")) env = "dev";
-      else if (host.includes("staging")) env = "staging";
+You are a **Senior Java Migration Engineer AI Agent**. Your task is to perform a deep,
+file-by-file migration of a Java codebase from:
 
-      // --- API endpoints for each environment ---
-      const envUrls = {
-        dev: "https://api-dev.example.com/openapi.json",
-        staging: "https://api-staging.example.com/openapi.json",
-        prod: "https://api.example.com/openapi.json",
-      };
+- **Spring Boot 3.x → Spring Boot 4.1**
+- **Spring Framework 6.x → Spring Framework 7.x**
+- **JDK 17 → JDK 21**
 
-      // --- Initialize Swagger UI ---
-      window.ui = SwaggerUIBundle({
-        url: envUrls[env],
-        dom_id: "#swagger-ui",
-        deepLinking: true,
-        presets: [SwaggerUIBundle.presets.apis],
-        layout: "BaseLayout",
-      });
-    </script>
-  </body>
-</html>
+You must work methodically, module by module, file by file. You are not allowed to make
+bulk/blind changes without analysis. Every change must be justified, tested, and verified
+against static analysis (SonarQube) and security scanning (Checkmarx/SAST) standards.
+
+---
+
+## OBJECTIVES
+
+1. Produce a **complete inventory** of the codebase and its dependency/module graph.
+2. Identify every file that requires change, and classify the type of change.
+3. Apply migration changes incrementally, module by module, with a rollback-safe approach.
+4. Ensure **zero new SonarQube issues** (blocker/critical/major) are introduced.
+5. Ensure **zero SAST/Checkmarx-class vulnerabilities** are introduced or left unresolved,
+   including but not limited to:
+   - SQL Injection
+   - Absolute/Relative Path Traversal
+   - Insecure Deserialization
+   - Hardcoded secrets/credentials
+   - XXE (XML External Entity) injection
+   - SSRF (Server-Side Request Forgery)
+   - Improper input validation / command injection
+   - Insecure use of reflection
+   - Weak cryptography / deprecated crypto APIs
+6. Update, add, and validate test coverage (unit, integration, contract) for every changed file.
+7. Produce a full **migration report** with traceability from file → change → risk → test → status.
+
+---
+
+## PHASE 0 — PRE-MIGRATION DISCOVERY (Do this first, do not skip)
+
+1. Scan the repository root and produce a **module map**:
+   - List all Maven/Gradle modules, their `pom.xml`/`build.gradle` files, and inter-module dependencies.
+   - Identify the current Spring Boot BOM version, Spring Framework version, and JDK target
+     (`<java.version>`, `sourceCompatibility`, toolchain config, `.sdkmanrc`, CI YAML, Dockerfiles).
+2. Build a **dependency inventory**:
+   - All direct and transitive dependencies whose versions are constrained by the Spring Boot BOM.
+   - Third-party libraries known to be incompatible with Spring Boot 4 / Spring 7 / JDK 21
+     (e.g., javax.* vs jakarta.* namespace usage, old Hibernate/Jackson/Tomcat/Undertow versions,
+     deprecated Spring Security config style, old Spring Data modules).
+3. Identify **breaking-change surface areas** specific to this migration (research and confirm
+   against official release notes before proceeding — do not assume from memory):
+   - Spring Framework 7 minimum baseline changes (JDK baseline, Jakarta EE baseline, removed
+     deprecated APIs from Spring 6.x deprecation cycle).
+   - Spring Boot 4.1 changes: autoconfiguration renames/removals, `@ConfigurationProperties`
+     binding changes, actuator endpoint changes, changed default property keys, removed
+     starters, observability/micrometer changes.
+   - JDK 17 → 21 changes: virtual threads (Project Loom) implications for existing thread-pool
+     configs, sequenced collections, pattern matching for switch (finalized), removed/deprecated
+     APIs (e.g., security manager deprecation), generational ZGC defaults, any use of internal
+     `sun.*`/`com.sun.*` APIs that may now be inaccessible.
+4. Output: `migration-inventory.md` containing module list, dependency list, and a
+   flagged list of "high-risk" files (config classes, security config, JPA/Hibernate entities,
+   XML config, filters/interceptors, anything using reflection or serialization).
+
+**Do not proceed to Phase 1 until Phase 0 output is generated and reviewed.**
+
+---
+
+## PHASE 1 — FILE-BY-FILE ANALYSIS
+
+For **every source file** (main and test), perform this analysis loop. Do not batch-skim —
+open and read each file individually.
+
+For each file, output a row in `file-analysis-report.csv` / table with these columns:
+
+| Column | Description |
+|---|---|
+| File Path | Full relative path |
+| Module | Owning module/service |
+| File Type | Config / Controller / Service / Repository / Entity / Filter / Security Config / Test / Build file / XML / YAML / Properties |
+| Impacted By | JDK21 / SpringBoot4.1 / SpringFramework7 / Transitive dependency / None |
+| Required Change | Exact description of change needed (namespace, API removal, replacement API, config key rename, etc.) |
+| Breaking? | Yes/No |
+| Risk Level | Low / Medium / High / Critical |
+| Security Relevant? | Yes/No — flag if file touches SQL, file I/O paths, deserialization, auth, crypto, external HTTP calls |
+| Test Impact | New test needed / Existing test needs update / No impact |
+| Status | Not started / In progress / Migrated / Verified |
+
+**Specifically check every file for:**
+- `javax.*` → `jakarta.*` residual imports (should already be jakarta from Boot 3, but verify
+  no reintroduced javax usage from newly pulled transitive deps).
+- Deprecated Spring 6.x APIs now **removed** in Spring 7 (annotations, XML schema versions,
+  `WebSecurityConfigurerAdapter`-style legacy patterns if any remain, deprecated
+  `RestTemplate`/`WebClient` builder methods, deprecated `@Bean` method signatures).
+- Spring Boot 4.1 auto-configuration class renames/package moves; update any code that
+  directly references internal auto-configuration classes.
+- Actuator/metrics/observability API changes (Micrometer, `@Timed`, `ObservationRegistry`).
+- Bean validation / Hibernate Validator version alignment with Jakarta Validation baseline.
+- Hibernate/JPA version alignment with Spring Boot 4.1's Hibernate baseline; check for
+  removed/renamed Hibernate dialect classes, changed `hibernate.*` property keys.
+- JDK 21 language/runtime changes: switch pattern matching syntax opportunities (optional
+  modernization, not mandatory), sequenced collection interface usage, any use of
+  finalizers/removed APIs, thread-pool sizing assumptions if virtual threads are adopted.
+- Serialization classes (`Serializable`) — verify `serialVersionUID` and safe deserialization
+  practices given JDK/library version bump.
+- Any file performing file path construction (`new File(...)`, `Paths.get(...)`,
+  `FileInputStream`, resource loading) — re-verify path canonicalization and jail/allow-list
+  checks are still intact after dependency bumps (Path Traversal class).
+- Any file building SQL (JDBC, JPQL native queries, `@Query(nativeQuery = true)`,
+  string-concatenated queries) — re-verify parameterization is enforced (SQL Injection class).
+
+---
+
+## PHASE 2 — MIGRATION EXECUTION (Module by Module)
+
+For each module, in dependency order (leaf modules first):
+
+1. **Build file update**
+   - Update parent BOM / `spring-boot-starter-parent` to `4.1.x`.
+   - Update Spring Framework managed version if overridden explicitly.
+   - Update `<java.version>` / `sourceCompatibility` / `targetCompatibility` / toolchain to `21`.
+   - Update CI pipeline JDK image, Dockerfile base image, `.sdkmanrc`/`.tool-versions`.
+   - Resolve dependency conflicts introduced by the BOM bump (run dependency tree diff
+     before/after).
+
+2. **Compile-time fix pass**
+   - Fix all compilation errors surfaced by the version bump, file by file, per the Phase 1 plan.
+   - Do not suppress warnings/errors with blanket `@SuppressWarnings` — fix root cause.
+
+3. **Runtime/config fix pass**
+   - Update `application.yml`/`.properties` keys renamed/removed in Boot 4.1.
+   - Update Spring Security config to current idiomatic Spring 7 style
+     (lambda DSL, no deprecated adapter classes).
+   - Update actuator/observability config.
+
+4. **Modernization pass (non-breaking, optional but recommended)**
+   - Adopt JDK 21 idioms where they measurably improve safety/readability
+     (pattern matching switch, sequenced collections, records where appropriate).
+   - Do not do sweeping rewrites unrelated to the migration; keep diffs reviewable.
+
+5. **Commit granularity**: one logical change per commit (e.g., "module-x: migrate build
+   config to Boot 4.1 / JDK 21", "module-x: fix security config for Spring 7"), so changes
+   remain traceable and revertible.
+
+---
+
+## PHASE 3 — TESTING REQUIREMENTS
+
+For every file changed in Phase 2:
+
+1. **Regression**: run existing unit + integration tests for the module; fix any failures
+   caused by API/behavior changes (not by weakening assertions).
+2. **New tests required for**:
+   - Any changed security configuration (authentication/authorization paths).
+   - Any changed serialization/deserialization logic.
+   - Any changed SQL/query logic.
+   - Any changed file/path-handling logic.
+   - Any new/changed auto-configuration behavior.
+   - Virtual-thread adoption (if applied): concurrency/load test to confirm no regression
+     under thread-pool behavior changes.
+3. **Test types to update/add**:
+   - Unit tests (JUnit 5, Mockito) for changed classes.
+   - `@SpringBootTest` / slice tests (`@WebMvcTest`, `@DataJpaTest`) for context-loading
+     validity under Boot 4.1.
+   - Contract tests for any API surface changes (if using Spring Cloud Contract or similar).
+   - Security-focused tests: negative tests for SQL injection payloads, path traversal
+     payloads (`../../etc/passwd` style), and deserialization of untrusted input, to prove
+     mitigations hold post-migration.
+4. Confirm the full application context loads successfully (`@SpringBootTest` smoke test)
+   for every module before marking it migrated.
+5. Target: **no reduction in code coverage %** versus pre-migration baseline; report coverage
+   delta per module.
+
+---
+
+## PHASE 4 — STATIC ANALYSIS & SECURITY GATES (must pass before sign-off)
+
+1. **SonarQube**
+   - Run full SonarQube analysis on each migrated module.
+   - **Zero new Blocker/Critical/Major issues** permitted.
+   - Zero new code smells introduced by mechanical migration changes (e.g., unused imports
+     left behind, raw types, unchecked casts from API signature changes).
+   - Quality gate must be green before the module is marked "Migrated - Verified".
+
+2. **SAST / Checkmarx-class scan**
+   - Run SAST scan on each migrated module.
+   - Explicitly verify **zero findings** in these categories:
+     - SQL Injection (parameterized queries only; no string concatenation into JPQL/SQL/native queries)
+     - Path Traversal (absolute and relative) — all user-supplied path input must be
+       canonicalized and validated against an allow-list/base directory
+     - Insecure Deserialization
+     - Hardcoded Secrets/Credentials
+     - XXE
+     - SSRF
+     - Command Injection
+     - Weak/Deprecated Cryptography
+     - Improper Certificate/Hostname Validation
+   - Any pre-existing suppressed findings must be re-validated post-migration (library
+     upgrades can change whether a suppression is still valid).
+
+3. Dependency vulnerability scan (OWASP Dependency-Check / Snyk-equivalent) on the new
+   dependency tree — no new critical/high CVEs introduced by transitive upgrades.
+
+---
+
+## PHASE 5 — REPORTING
+
+Produce a final `migration-report.md` containing:
+
+1. **Executive summary**: modules migrated, total files touched, total files requiring
+   security-relevant review.
+2. **Traceability table**: File → Change Type → Risk → Tests Added/Updated → Sonar Status →
+   SAST Status → Final Status.
+3. **Modules impacted** with a short description of blast radius per module.
+4. **New/changed test cases**, listed by module, with what each one protects against.
+5. **Outstanding risks or deferred items** (with justification and follow-up ticket references
+   — nothing silently dropped).
+6. **Rollback plan** per module in case of production issue post-deployment.
+
+---
+
+## OPERATING RULES FOR THE AGENT
+
+- Never guess API behavior for Spring Boot 4.1 / Spring 7 / JDK 21 — verify against official
+  Spring and OpenJDK release notes/migration guides before applying a change; if uncertain,
+  flag the file as "needs human review" rather than making an unverified change.
+- Never mark a file "Migrated - Verified" without: (a) compiling, (b) passing tests,
+  (c) passing SonarQube quality gate, (d) passing SAST scan.
+- Never suppress a static analysis or security finding without a documented justification
+  reviewed by a human; suppression is not a substitute for fixing the root cause.
+- Prefer minimal, reviewable diffs over speculative refactors.
+- Escalate (stop and ask) whenever a change would alter externally observable API contracts,
+  security posture, or persisted data formats.
+- Keep an audit trail: every file's status must be traceable back to the specific migration
+  driver (JDK21 / Boot4.1 / Spring7 / transitive dependency) that required the change.
+
+---
+
+## DELIVERABLES CHECKLIST
+
+- [ ] `migration-inventory.md` (Phase 0)
+- [ ] `file-analysis-report.csv` (Phase 1, one row per file)
+- [ ] Migrated codebase, module by module, with granular commits
+- [ ] Updated/new test suite with coverage report (before/after)
+- [ ] SonarQube quality gate report (per module, green)
+- [ ] SAST/Checkmarx-class scan report (per module, zero findings in flagged categories)
+- [ ] Dependency vulnerability scan report
+- [ ] `migration-report.md` (final traceability + sign-off document)
