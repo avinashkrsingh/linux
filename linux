@@ -1,249 +1,725 @@
-# AI Agent Prompt: Spring Boot 3.x → 4.1 / Spring Framework 6 → 7 / JDK 17 → 21 Migration
+# Devin Prompts: Market-Ready Self-Service BI Tool
 
-## ROLE
+## Purpose
 
-You are a **Senior Java Migration Engineer AI Agent**. Your task is to perform a deep,
-file-by-file migration of a Java codebase from:
+Enhance the existing self-service Business Intelligence (BI) application incrementally. Preserve its current architecture, UI structure, data model, APIs, and coding conventions wherever practical. Avoid broad rewrites, unnecessary dependencies, and changes that could break existing reports.
 
-- **Spring Boot 3.x → Spring Boot 4.1**
-- **Spring Framework 6.x → Spring Framework 7.x**
-- **JDK 17 → JDK 21**
+## How to Use This File
 
-You must work methodically, module by module, file by file. You are not allowed to make
-bulk/blind changes without analysis. Every change must be justified, tested, and verified
-against static analysis (SonarQube) and security scanning (Checkmarx/SAST) standards.
+1. Start with the **Master Prompt** so Devin inspects the current implementation and produces a gap analysis.
+2. Review the findings and agree on the smallest high-impact change.# Devin Prompts: Market-Ready Self-Service BI Tool
 
----
+## Purpose
 
-## OBJECTIVES
+Enhance the existing self-service Business Intelligence (BI) application incrementally. Preserve its current architecture, UI structure, data model, APIs, and coding conventions wherever practical. Avoid broad rewrites, unnecessary dependencies, and changes that could break existing reports.
 
-1. Produce a **complete inventory** of the codebase and its dependency/module graph.
-2. Identify every file that requires change, and classify the type of change.
-3. Apply migration changes incrementally, module by module, with a rollback-safe approach.
-4. Ensure **zero new SonarQube issues** (blocker/critical/major) are introduced.
-5. Ensure **zero SAST/Checkmarx-class vulnerabilities** are introduced or left unresolved,
-   including but not limited to:
-   - SQL Injection
-   - Absolute/Relative Path Traversal
-   - Insecure Deserialization
-   - Hardcoded secrets/credentials
-   - XXE (XML External Entity) injection
-   - SSRF (Server-Side Request Forgery)
-   - Improper input validation / command injection
-   - Insecure use of reflection
-   - Weak cryptography / deprecated crypto APIs
-6. Update, add, and validate test coverage (unit, integration, contract) for every changed file.
-7. Produce a full **migration report** with traceability from file → change → risk → test → status.
+## How to Use This File
+
+1. Start with the *Master Prompt* so Devin inspects the current implementation and produces a gap analysis.
+2. Review the findings and agree on the smallest high-impact change.
+3. Run one feature prompt at a time.
+4. Ask Devin to explain the affected components, risks, and acceptance criteria before implementation.
+5. Require tests and regression checks after each change.
 
 ---
 
-## PHASE 0 — PRE-MIGRATION DISCOVERY (Do this first, do not skip)
+## Prompt 1 — Master Prompt: Inspect and Prioritize
 
-1. Scan the repository root and produce a **module map**:
-   - List all Maven/Gradle modules, their `pom.xml`/`build.gradle` files, and inter-module dependencies.
-   - Identify the current Spring Boot BOM version, Spring Framework version, and JDK target
-     (`<java.version>`, `sourceCompatibility`, toolchain config, `.sdkmanrc`, CI YAML, Dockerfiles).
-2. Build a **dependency inventory**:
-   - All direct and transitive dependencies whose versions are constrained by the Spring Boot BOM.
-   - Third-party libraries known to be incompatible with Spring Boot 4 / Spring 7 / JDK 21
-     (e.g., javax.* vs jakarta.* namespace usage, old Hibernate/Jackson/Tomcat/Undertow versions,
-     deprecated Spring Security config style, old Spring Data modules).
-3. Identify **breaking-change surface areas** specific to this migration (research and confirm
-   against official release notes before proceeding — do not assume from memory):
-   - Spring Framework 7 minimum baseline changes (JDK baseline, Jakarta EE baseline, removed
-     deprecated APIs from Spring 6.x deprecation cycle).
-   - Spring Boot 4.1 changes: autoconfiguration renames/removals, `@ConfigurationProperties`
-     binding changes, actuator endpoint changes, changed default property keys, removed
-     starters, observability/micrometer changes.
-   - JDK 17 → 21 changes: virtual threads (Project Loom) implications for existing thread-pool
-     configs, sequenced collections, pattern matching for switch (finalized), removed/deprecated
-     APIs (e.g., security manager deprecation), generational ZGC defaults, any use of internal
-     `sun.*`/`com.sun.*` APIs that may now be inaccessible.
-4. Output: `migration-inventory.md` containing module list, dependency list, and a
-   flagged list of "high-risk" files (config classes, security config, JPA/Hibernate entities,
-   XML config, filters/interceptors, anything using reflection or serialization).
+We are building an enterprise-grade, market-ready self-service BI reporting tool. The application is partially implemented, and we want to enhance the existing functionality incrementally.
 
-**Do not proceed to Phase 1 until Phase 0 output is generated and reviewed.**
+*Critical instruction: Preserve the existing structure.* Do not redesign the application, replace the current architecture, rewrite working components, or introduce unnecessary dependencies. Build on top of the current implementation and follow its existing coding patterns, UI conventions, data model, and technology stack.
 
----
+### Step 1 — Inspect the existing implementation
 
-## PHASE 1 — FILE-BY-FILE ANALYSIS
+Review the current application, source code, screens, data flow, APIs, database connectivity, and existing report-building functionality.
 
-For **every source file** (main and test), perform this analysis loop. Do not batch-skim —
-open and read each file individually.
+Identify:
+- What is already implemented and working.
+- What is partially implemented or missing.
+- Existing bugs, usability gaps, security risks, and performance bottlenecks.
+- Opportunities to improve functionality with minimal code changes.
 
-For each file, output a row in `file-analysis-report.csv` / table with these columns:
+Do not assume a feature is missing until you have inspected the relevant implementation.
 
-| Column | Description |
-|---|---|
-| File Path | Full relative path |
-| Module | Owning module/service |
-| File Type | Config / Controller / Service / Repository / Entity / Filter / Security Config / Test / Build file / XML / YAML / Properties |
-| Impacted By | JDK21 / SpringBoot4.1 / SpringFramework7 / Transitive dependency / None |
-| Required Change | Exact description of change needed (namespace, API removal, replacement API, config key rename, etc.) |
-| Breaking? | Yes/No |
-| Risk Level | Low / Medium / High / Critical |
-| Security Relevant? | Yes/No — flag if file touches SQL, file I/O paths, deserialization, auth, crypto, external HTTP calls |
-| Test Impact | New test needed / Existing test needs update / No impact |
-| Status | Not started / In progress / Migrated / Verified |
+### Step 2 — Enhance the report-building workflow
 
-**Specifically check every file for:**
-- `javax.*` → `jakarta.*` residual imports (should already be jakarta from Boot 3, but verify
-  no reintroduced javax usage from newly pulled transitive deps).
-- Deprecated Spring 6.x APIs now **removed** in Spring 7 (annotations, XML schema versions,
-  `WebSecurityConfigurerAdapter`-style legacy patterns if any remain, deprecated
-  `RestTemplate`/`WebClient` builder methods, deprecated `@Bean` method signatures).
-- Spring Boot 4.1 auto-configuration class renames/package moves; update any code that
-  directly references internal auto-configuration classes.
-- Actuator/metrics/observability API changes (Micrometer, `@Timed`, `ObservationRegistry`).
-- Bean validation / Hibernate Validator version alignment with Jakarta Validation baseline.
-- Hibernate/JPA version alignment with Spring Boot 4.1's Hibernate baseline; check for
-  removed/renamed Hibernate dialect classes, changed `hibernate.*` property keys.
-- JDK 21 language/runtime changes: switch pattern matching syntax opportunities (optional
-  modernization, not mandatory), sequenced collection interface usage, any use of
-  finalizers/removed APIs, thread-pool sizing assumptions if virtual threads are adopted.
-- Serialization classes (`Serializable`) — verify `serialVersionUID` and safe deserialization
-  practices given JDK/library version bump.
-- Any file performing file path construction (`new File(...)`, `Paths.get(...)`,
-  `FileInputStream`, resource loading) — re-verify path canonicalization and jail/allow-list
-  checks are still intact after dependency bumps (Path Traversal class).
-- Any file building SQL (JDBC, JPQL native queries, `@Query(nativeQuery = true)`,
-  string-concatenated queries) — re-verify parameterization is enforced (SQL Injection class).
+Build upon the existing workflow to support:
+1. Selecting a business module and viewing only its approved tables and columns.
+2. Selecting dimensions and measures, with appropriate aggregation and data-type validation.
+3. Adding filters and user prompts, including date ranges, dropdowns, multi-selects, mandatory prompts, and sensible default values.
+4. Previewing report results before saving.
+5. Saving, editing, duplicating, renaming, and reusing reports.
+6. Running reports on demand and managing report subscriptions.
+7. Scheduling report delivery using supported formats and frequencies, if the existing architecture supports it.
 
----
+Preserve the current report types and extend them only where there is a clear user need.
 
-## PHASE 2 — MIGRATION EXECUTION (Module by Module)
+### Step 3 — Improve enterprise readiness
 
-For each module, in dependency order (leaf modules first):
+Evaluate and incrementally improve:
+- Query validation and protection against SQL injection.
+- Table and column access controls, row-level security, and object-level permissions.
+- Pagination, query timeouts, result-size limits, and large-data handling.
+- Meaningful validation messages, empty states, loading indicators, and recoverable errors.
+- Audit logging for report creation, modification, execution, sharing, and subscription changes.
+- Safe handling of saved report definitions, concurrent edits, and report version history.
+- Accessibility, responsive layouts, and consistent UI behavior.
 
-1. **Build file update**
-   - Update parent BOM / `spring-boot-starter-parent` to `4.1.x`.
-   - Update Spring Framework managed version if overridden explicitly.
-   - Update `<java.version>` / `sourceCompatibility` / `targetCompatibility` / toolchain to `21`.
-   - Update CI pipeline JDK image, Dockerfile base image, `.sdkmanrc`/`.tool-versions`.
-   - Resolve dependency conflicts introduced by the BOM bump (run dependency tree diff
-     before/after).
+Never bypass existing authorization controls or expose restricted data through previews, exports, or scheduled reports.
 
-2. **Compile-time fix pass**
-   - Fix all compilation errors surfaced by the version bump, file by file, per the Phase 1 plan.
-   - Do not suppress warnings/errors with blanket `@SuppressWarnings` — fix root cause.
+### Step 4 — Maintain backward compatibility
 
-3. **Runtime/config fix pass**
-   - Update `application.yml`/`.properties` keys renamed/removed in Boot 4.1.
-   - Update Spring Security config to current idiomatic Spring 7 style
-     (lambda DSL, no deprecated adapter classes).
-   - Update actuator/observability config.
+Reuse existing components, APIs, metadata, and database objects wherever practical. Avoid breaking existing reports, saved configurations, user permissions, and subscriptions. Do not change production data structures or database objects without explaining and validating the need.
 
-4. **Modernization pass (non-breaking, optional but recommended)**
-   - Adopt JDK 21 idioms where they measurably improve safety/readability
-     (pattern matching switch, sequenced collections, records where appropriate).
-   - Do not do sweeping rewrites unrelated to the migration; keep diffs reviewable.
+### Step 5 — Validate before completing
 
-5. **Commit granularity**: one logical change per commit (e.g., "module-x: migrate build
-   config to Boot 4.1 / JDK 21", "module-x: fix security config for Spring 7"), so changes
-   remain traceable and revertible.
+For every proposed change:
+- Explain the user problem it solves.
+- Identify the existing component or workflow to modify.
+- Describe the smallest practical implementation.
+- List potential regression risks and dependencies.
+- Add or update appropriate tests.
+- Verify existing functionality remains intact.
+
+### Expected output
+
+First, provide a prioritized gap analysis with:
+1. Existing capability.
+2. Identified gap.
+3. Proposed enhancement.
+4. Business value.
+5. Implementation complexity: Low, Medium, or High.
+6. Dependencies and risks.
+7. Acceptance criteria.
+
+Group recommendations into:
+- *P0:* Security or critical defects.
+- *P1:* Essential for market readiness.
+- *P2:* High-value enhancements.
+- *P3:* Future enhancements.
+
+Do not start a broad rewrite. Recommend the smallest high-impact improvements first, and implement them incrementally only after explaining the proposed changes. Clearly distinguish verified findings from assumptions.
 
 ---
 
-## PHASE 3 — TESTING REQUIREMENTS
+## Prompt 2 — P0: Secure Report Execution
 
-For every file changed in Phase 2:
+Inspect the existing report execution workflow. Verify that all selected tables and columns are authorized, user inputs are safely parameterized, and existing row-level and object-level permissions are enforced.
 
-1. **Regression**: run existing unit + integration tests for the module; fix any failures
-   caused by API/behavior changes (not by weakening assertions).
-2. **New tests required for**:
-   - Any changed security configuration (authentication/authorization paths).
-   - Any changed serialization/deserialization logic.
-   - Any changed SQL/query logic.
-   - Any changed file/path-handling logic.
-   - Any new/changed auto-configuration behavior.
-   - Virtual-thread adoption (if applied): concurrency/load test to confirm no regression
-     under thread-pool behavior changes.
-3. **Test types to update/add**:
-   - Unit tests (JUnit 5, Mockito) for changed classes.
-   - `@SpringBootTest` / slice tests (`@WebMvcTest`, `@DataJpaTest`) for context-loading
-     validity under Boot 4.1.
-   - Contract tests for any API surface changes (if using Spring Cloud Contract or similar).
-   - Security-focused tests: negative tests for SQL injection payloads, path traversal
-     payloads (`../../etc/passwd` style), and deserialization of untrusted input, to prove
-     mitigations hold post-migration.
-4. Confirm the full application context loads successfully (`@SpringBootTest` smoke test)
-   for every module before marking it migrated.
-5. Target: **no reduction in code coverage %** versus pre-migration baseline; report coverage
-   delta per module.
+Check previews, saved reports, exports, and subscriptions for possible data leakage. Reuse existing security mechanisms and fix only verified gaps. Add regression tests and explain any changes before implementation.
+
+Acceptance criteria:
+- Unauthorized tables, columns, reports, and rows cannot be accessed.
+- User-supplied values cannot alter query structure or bypass validation.
+- Authorization is enforced consistently across preview, execution, export, and scheduled delivery.
+- Security failures are handled without exposing sensitive data.
+- Regression tests cover the verified risks.
 
 ---
 
-## PHASE 4 — STATIC ANALYSIS & SECURITY GATES (must pass before sign-off)
+## Prompt 3 — P1: Make Report Creation Intuitive
 
-1. **SonarQube**
-   - Run full SonarQube analysis on each migrated module.
-   - **Zero new Blocker/Critical/Major issues** permitted.
-   - Zero new code smells introduced by mechanical migration changes (e.g., unused imports
-     left behind, raw types, unchecked casts from API signature changes).
-   - Quality gate must be green before the module is marked "Migrated - Verified".
+Improve the existing report builder without changing its layout or architecture unnecessarily. Make the workflow clear:
 
-2. **SAST / Checkmarx-class scan**
-   - Run SAST scan on each migrated module.
-   - Explicitly verify **zero findings** in these categories:
-     - SQL Injection (parameterized queries only; no string concatenation into JPQL/SQL/native queries)
-     - Path Traversal (absolute and relative) — all user-supplied path input must be
-       canonicalized and validated against an allow-list/base directory
-     - Insecure Deserialization
-     - Hardcoded Secrets/Credentials
-     - XXE
-     - SSRF
-     - Command Injection
-     - Weak/Deprecated Cryptography
-     - Improper Certificate/Hostname Validation
-   - Any pre-existing suppressed findings must be re-validated post-migration (library
-     upgrades can change whether a suppression is still valid).
+1. Select module.
+2. Select approved fields.
+3. Configure dimensions and measures.
+4. Add filters and prompts.
+5. Preview results.
+6. Save and run the report.
 
-3. Dependency vulnerability scan (OWASP Dependency-Check / Snyk-equivalent) on the new
-   dependency tree — no new critical/high CVEs introduced by transitive upgrades.
+Provide useful validation messages, preserve selections when navigating backward, and prevent invalid report configurations. Reuse current components and add tests.
+
+Acceptance criteria:
+- Users can complete a valid report creation flow without developer intervention.
+- Invalid combinations and unsupported aggregations are explained clearly.
+- Navigation does not unexpectedly discard valid user selections.
+- Preview, save, and run behave consistently.
+- Existing report types and workflows continue to work.
 
 ---
 
-## PHASE 5 — REPORTING
+## Prompt 4 — P1: Smarter Filters and Prompts
 
-Produce a final `migration-report.md` containing:
+Inspect existing filter and prompt functionality. Extend it to support date ranges, single-select and multi-select dropdowns, search-enabled values, mandatory prompts, default values, and dependent prompts where feasible.
 
-1. **Executive summary**: modules migrated, total files touched, total files requiring
-   security-relevant review.
-2. **Traceability table**: File → Change Type → Risk → Tests Added/Updated → Sonar Status →
-   SAST Status → Final Status.
-3. **Modules impacted** with a short description of blast radius per module.
-4. **New/changed test cases**, listed by module, with what each one protects against.
-5. **Outstanding risks or deferred items** (with justification and follow-up ticket references
-   — nothing silently dropped).
-6. **Rollback plan** per module in case of production issue post-deployment.
+Use actual metadata and data types. Prevent invalid filters and unsafe SQL construction. Preserve current behavior and prioritize the smallest incremental implementation.
 
----
-
-## OPERATING RULES FOR THE AGENT
-
-- Never guess API behavior for Spring Boot 4.1 / Spring 7 / JDK 21 — verify against official
-  Spring and OpenJDK release notes/migration guides before applying a change; if uncertain,
-  flag the file as "needs human review" rather than making an unverified change.
-- Never mark a file "Migrated - Verified" without: (a) compiling, (b) passing tests,
-  (c) passing SonarQube quality gate, (d) passing SAST scan.
-- Never suppress a static analysis or security finding without a documented justification
-  reviewed by a human; suppression is not a substitute for fixing the root cause.
-- Prefer minimal, reviewable diffs over speculative refactors.
-- Escalate (stop and ask) whenever a change would alter externally observable API contracts,
-  security posture, or persisted data formats.
-- Keep an audit trail: every file's status must be traceable back to the specific migration
-  driver (JDK21 / Boot4.1 / Spring7 / transitive dependency) that required the change.
+Acceptance criteria:
+- Prompt types match the underlying field's data type.
+- Required prompts are validated before execution.
+- Defaults and dependent values behave predictably.
+- User inputs are passed safely to query execution.
+- Empty, invalid, and unavailable values have clear handling.
+- Existing saved reports remain compatible.
 
 ---
 
-## DELIVERABLES CHECKLIST
+## Prompt 5 — P1: Save, Edit, Duplicate, and Reuse Reports
 
-- [ ] `migration-inventory.md` (Phase 0)
-- [ ] `file-analysis-report.csv` (Phase 1, one row per file)
-- [ ] Migrated codebase, module by module, with granular commits
-- [ ] Updated/new test suite with coverage report (before/after)
-- [ ] SonarQube quality gate report (per module, green)
-- [ ] SAST/Checkmarx-class scan report (per module, zero findings in flagged categories)
-- [ ] Dependency vulnerability scan report
-- [ ] `migration-report.md` (final traceability + sign-off document)
+Enhance the existing saved-report workflow to support edit, save-as, duplicate, rename, and clear ownership and sharing rules. Prevent accidental overwrites and handle concurrent modifications safely.
+
+Preserve existing report IDs, definitions, and subscriptions wherever possible. Add confirmation messages and regression tests.
+
+Acceptance criteria:
+- Users can distinguish editing an existing report from creating a copy.
+- Overwrites and destructive actions are confirmed where appropriate.
+- Concurrent changes do not silently overwrite newer edits.
+- Ownership and sharing permissions are enforced.
+- Existing report references and subscriptions continue to work.
+
+---
+
+## Prompt 6 — P1: Scheduled Reports and Subscriptions
+
+Review the existing subscription and scheduling functionality. Identify missing capabilities for frequency, start date, time zone, recipients, delivery format, failure notifications, pause/resume, and cancellation.
+
+Reuse existing scheduling infrastructure. Ensure permissions are revalidated when a report executes and avoid duplicate or overlapping scheduled jobs.
+
+Acceptance criteria:
+- Schedule frequency, time zone, and delivery settings are explicit.
+- Users can view and manage their subscriptions according to permissions.
+- Failed jobs are logged and surfaced appropriately without exposing sensitive data.
+- Duplicate or overlapping execution is controlled.
+- Access is revalidated at execution and delivery time.
+- Existing subscriptions remain valid.
+
+---
+
+## Prompt 7 — P1: Performance and Scalability
+
+Analyze report execution performance and scalability using the current architecture. Check pagination, query timeouts, result limits, repeated queries, expensive joins, and large exports.
+
+Recommend measurable improvements without prematurely introducing caching or changing database architecture. Add performance tests or benchmarks where practical.
+
+Acceptance criteria:
+- Large result sets are handled predictably.
+- Queries have appropriate timeout and result-limit behavior.
+- Pagination does not return duplicate or missing rows under supported ordering rules.
+- Expensive query paths are identified with evidence.
+- Any optimization preserves result correctness and authorization.
+- Performance changes are measured against a baseline where possible.
+
+---
+
+## Prompt 8 — P2: Improve the End-User Experience
+
+Audit the current BI tool from a nontechnical business user's perspective. Identify confusing steps, unclear labels, missing guidance, poor empty states, and unhelpful errors.
+
+Improve the existing UI incrementally, maintaining current design conventions. Ensure keyboard accessibility, readable tables, consistent loading states, and responsive behavior.
+
+Acceptance criteria:
+- Common workflows use consistent labels and controls.
+- Empty, loading, success, and error states are understandable.
+- Keyboard navigation and accessible labels are supported in key workflows.
+- Layouts remain usable at supported screen sizes.
+- Existing design conventions and working components are preserved.
+
+---
+
+## Prompt 9 — P2: Auditability and Operational Support
+
+Inspect current logging and operational monitoring. Recommend a minimal audit trail for report creation, changes, execution outcomes, access changes, and subscription modifications.
+
+Include timestamps, actor identity, report reference, and outcome where appropriate. Avoid logging sensitive query parameters or confidential result data. Integrate with existing logging patterns.
+
+Acceptance criteria:
+- Important report lifecycle and access events are traceable.
+- Logs contain enough context for support and investigation.
+- Sensitive values and result data are not unnecessarily recorded.
+- Logging follows existing retention and access policies.
+- Logging failures do not unexpectedly break normal report execution.
+
+---
+
+## Prompt 10 — P2: Reusable Report Templates
+
+Inspect whether the application already supports templates or reusable report definitions. Extend the current implementation so authorized users can save a report configuration as a template and create new reports from it.
+
+Preserve the existing data model where possible. Define which settings are copied (such as selected fields, visual/report type, filters, and layout) and which must be reset or re-entered (such as credentials, sensitive prompt values, recipients, and ownership-specific settings).
+
+Acceptance criteria:
+- Users can create reports from authorized templates.
+- Template permissions and ownership are respected.
+- Sensitive values are not copied unintentionally.
+- Template updates do not silently change existing reports created from older versions.
+- Existing report definitions remain compatible.
+
+---
+
+## Prompt 11 — P2: Report Types and Visualizations
+
+Review the existing report types and visualization components. Identify the most valuable missing options for the current users, such as tabular reports, grouped summaries, pivot-style views, charts, and KPI summaries, but do not add every option by default.
+
+Recommend additions based on existing architecture and user needs. Reuse current visualization components and ensure every visualization uses the same validated data and permission rules as the underlying report.
+
+Acceptance criteria:
+- Only supported and meaningful report types are offered for each data configuration.
+- Labels, aggregations, totals, and sorting are correct.
+- Charts and tables reflect the same authorized result set.
+- Users receive clear validation when a selected visualization is incompatible with the data.
+- Existing report types continue to work.
+
+---
+
+## Prompt 12 — P2: Export and Data Portability
+
+Inspect existing export capabilities and recommend practical support for formats such as CSV and Excel, and PDF where appropriate to the current product.
+
+Preserve permissions, filters, sort order, and clearly defined export limits. Prevent formula injection in spreadsheet-compatible exports where relevant. Avoid loading unbounded datasets into memory.
+
+Acceptance criteria:
+- Exports match the user's authorized report result and selected filters.
+- Large exports are bounded or processed safely.
+- Spreadsheet exports safely handle values that could be interpreted as formulas.
+- Export errors are understandable and do not leak sensitive information.
+- Existing report execution and export behavior remains compatible.
+
+---
+
+## Prompt 13 — P2: Error Handling and Recovery
+
+Audit the report builder and execution flow for unexpected failures, validation errors, timeouts, and unavailable data sources. Improve error handling using existing application conventions.
+
+Show users a clear, actionable message without exposing stack traces, SQL internals, credentials, or sensitive data. Preserve safe user input and report configuration when a recoverable operation fails.
+
+Acceptance criteria:
+- Users can distinguish invalid input, permission denial, timeout, and system failure.
+- Recoverable failures do not erase report configuration.
+- Detailed diagnostics are available through approved logs rather than public UI messages.
+- Error handling does not bypass security controls.
+- Tests cover key failure scenarios.
+
+---
+
+## Prompt 14 — P2: Accessibility and Responsive Behavior
+
+Review the existing report builder and report results screens for accessibility and responsive design. Prioritize keyboard operation, focus visibility, semantic labels, readable contrast, accessible validation messages, and usable tables at supported screen sizes.
+
+Follow the current design system and avoid a visual redesign.
+
+Acceptance criteria:
+- Key report workflows can be completed using a keyboard.
+- Inputs and validation messages have accessible labels.
+- Focus remains predictable during dialogs and navigation.
+- Tables and controls remain usable at supported viewport widths.
+- Existing visual conventions are preserved.
+
+---
+
+## Prompt 15 — P3: Natural-Language Report Assistance
+
+Assess whether a natural-language assistant would add value to the current BI tool. If appropriate, propose a small, controlled feature that translates user questions into a draft report configuration using only approved metadata and supported operations.
+
+Do not execute generated SQL without validation. Require users to review the selected fields, filters, measures, and interpretation before running the report. Clearly indicate ambiguity and ask clarifying questions.
+
+Acceptance criteria:
+- The assistant uses only authorized tables, columns, and measures.
+- Generated configurations are validated by the existing report engine.
+- Ambiguous questions trigger clarification rather than fabricated assumptions.
+- Users can review and edit the draft before execution.
+- Existing permissions and query safety controls cannot be bypassed.
+- If implementation would require a major architectural change, return a proposal instead of implementing it.
+
+---
+
+## Prompt 16 — P3: Report Usage and Adoption Insights
+
+Inspect existing telemetry and audit data to determine whether the product can safely provide basic usage insights, such as frequently used reports, execution failures, subscription reliability, and report adoption.
+
+Use existing logging where practical. Avoid collecting unnecessary personal or sensitive information, and respect access controls.
+
+Acceptance criteria:
+- Metrics are based on reliable, documented events.
+- Access to usage information is restricted appropriately.
+- Metrics avoid exposing report contents or sensitive parameters.
+- The feature has clear operational or product value.
+- New telemetry is minimized and follows existing retention policies.
+
+---
+
+## Prompt 17 — Release Readiness and Regression Test Plan
+
+Before declaring the BI tool market-ready, review the implemented workflows and create a release-readiness report.
+
+Cover:
+- Report creation, preview, execution, save, edit, duplicate, and reuse.
+- Filters, prompts, data types, aggregation, sorting, and pagination.
+- Authorization, row-level security, and restricted fields.
+- Exports, subscriptions, schedules, and failure handling.
+- Performance with realistic data volumes.
+- Accessibility and responsive behavior.
+- Backward compatibility for existing reports and subscriptions.
+- Logging, monitoring, and recoverability.
+
+For each issue, record severity, reproduction steps, expected behavior, actual behavior, and a recommended fix. Run available automated tests and identify tests that could not be run.
+
+Do not claim that a test passed unless it was actually executed. Separate verified results from assumptions and unresolved risks. Recommend release blockers and the smallest fixes needed before release.
+
+---
+
+## Suggested Implementation Order
+
+1. *Master prompt:* Inspect the implementation and produce a prioritized gap analysis.
+2. *P0 security:* Address verified critical security and data-integrity risks.
+3. *P1 core workflow:* Report creation, filters/prompts, save/edit/reuse, subscriptions, and performance.
+4. *P2 usability and operations:* Error handling, accessibility, templates, exports, auditability, and selected report types.
+5. *P3 differentiators:* Natural-language assistance and adoption insights, only if justified by user needs and architecture.
+6. *Release readiness:* Run regression tests and document unresolved risks.
+
+## Reusable Instruction to Append to Any Feature Prompt
+
+Before changing code, inspect the existing implementation and identify the exact files and components involved. Explain the proposed minimal change, dependencies, and regression risks. Preserve current architecture and behavior wherever possible. Implement only the agreed scope, add or update tests, run the relevant test suite, and report what changed, what was tested, test results, and any unresolved issues. Do not claim success for checks that were not actually performed.
+3. Run one feature prompt at a time.
+4. Ask Devin to explain the affected components, risks, and acceptance criteria before implementation.
+5. Require tests and regression checks after each change.
+
+---
+
+## Prompt 1 — Master Prompt: Inspect and Prioritize
+
+We are building an enterprise-grade, market-ready self-service BI reporting tool. The application is partially implemented, and we want to enhance the existing functionality incrementally.
+
+**Critical instruction: Preserve the existing structure.** Do not redesign the application, replace the current architecture, rewrite working components, or introduce unnecessary dependencies. Build on top of the current implementation and follow its existing coding patterns, UI conventions, data model, and technology stack.
+
+### Step 1 — Inspect the existing implementation
+
+Review the current application, source code, screens, data flow, APIs, database connectivity, and existing report-building functionality.
+
+Identify:
+- What is already implemented and working.
+- What is partially implemented or missing.
+- Existing bugs, usability gaps, security risks, and performance bottlenecks.
+- Opportunities to improve functionality with minimal code changes.
+
+Do not assume a feature is missing until you have inspected the relevant implementation.
+
+### Step 2 — Enhance the report-building workflow
+
+Build upon the existing workflow to support:
+1. Selecting a business module and viewing only its approved tables and columns.
+2. Selecting dimensions and measures, with appropriate aggregation and data-type validation.
+3. Adding filters and user prompts, including date ranges, dropdowns, multi-selects, mandatory prompts, and sensible default values.
+4. Previewing report results before saving.
+5. Saving, editing, duplicating, renaming, and reusing reports.
+6. Running reports on demand and managing report subscriptions.
+7. Scheduling report delivery using supported formats and frequencies, if the existing architecture supports it.
+
+Preserve the current report types and extend them only where there is a clear user need.
+
+### Step 3 — Improve enterprise readiness
+
+Evaluate and incrementally improve:
+- Query validation and protection against SQL injection.
+- Table and column access controls, row-level security, and object-level permissions.
+- Pagination, query timeouts, result-size limits, and large-data handling.
+- Meaningful validation messages, empty states, loading indicators, and recoverable errors.
+- Audit logging for report creation, modification, execution, sharing, and subscription changes.
+- Safe handling of saved report definitions, concurrent edits, and report version history.
+- Accessibility, responsive layouts, and consistent UI behavior.
+
+Never bypass existing authorization controls or expose restricted data through previews, exports, or scheduled reports.
+
+### Step 4 — Maintain backward compatibility
+
+Reuse existing components, APIs, metadata, and database objects wherever practical. Avoid breaking existing reports, saved configurations, user permissions, and subscriptions. Do not change production data structures or database objects without explaining and validating the need.
+
+### Step 5 — Validate before completing
+
+For every proposed change:
+- Explain the user problem it solves.
+- Identify the existing component or workflow to modify.
+- Describe the smallest practical implementation.
+- List potential regression risks and dependencies.
+- Add or update appropriate tests.
+- Verify existing functionality remains intact.
+
+### Expected output
+
+First, provide a prioritized gap analysis with:
+1. Existing capability.
+2. Identified gap.
+3. Proposed enhancement.
+4. Business value.
+5. Implementation complexity: Low, Medium, or High.
+6. Dependencies and risks.
+7. Acceptance criteria.
+
+Group recommendations into:
+- **P0:** Security or critical defects.
+- **P1:** Essential for market readiness.
+- **P2:** High-value enhancements.
+- **P3:** Future enhancements.
+
+Do not start a broad rewrite. Recommend the smallest high-impact improvements first, and implement them incrementally only after explaining the proposed changes. Clearly distinguish verified findings from assumptions.
+
+---
+
+## Prompt 2 — P0: Secure Report Execution
+
+Inspect the existing report execution workflow. Verify that all selected tables and columns are authorized, user inputs are safely parameterized, and existing row-level and object-level permissions are enforced.
+
+Check previews, saved reports, exports, and subscriptions for possible data leakage. Reuse existing security mechanisms and fix only verified gaps. Add regression tests and explain any changes before implementation.
+
+Acceptance criteria:
+- Unauthorized tables, columns, reports, and rows cannot be accessed.
+- User-supplied values cannot alter query structure or bypass validation.
+- Authorization is enforced consistently across preview, execution, export, and scheduled delivery.
+- Security failures are handled without exposing sensitive data.
+- Regression tests cover the verified risks.
+
+---
+
+## Prompt 3 — P1: Make Report Creation Intuitive
+
+Improve the existing report builder without changing its layout or architecture unnecessarily. Make the workflow clear:
+
+1. Select module.
+2. Select approved fields.
+3. Configure dimensions and measures.
+4. Add filters and prompts.
+5. Preview results.
+6. Save and run the report.
+
+Provide useful validation messages, preserve selections when navigating backward, and prevent invalid report configurations. Reuse current components and add tests.
+
+Acceptance criteria:
+- Users can complete a valid report creation flow without developer intervention.
+- Invalid combinations and unsupported aggregations are explained clearly.
+- Navigation does not unexpectedly discard valid user selections.
+- Preview, save, and run behave consistently.
+- Existing report types and workflows continue to work.
+
+---
+
+## Prompt 4 — P1: Smarter Filters and Prompts
+
+Inspect existing filter and prompt functionality. Extend it to support date ranges, single-select and multi-select dropdowns, search-enabled values, mandatory prompts, default values, and dependent prompts where feasible.
+
+Use actual metadata and data types. Prevent invalid filters and unsafe SQL construction. Preserve current behavior and prioritize the smallest incremental implementation.
+
+Acceptance criteria:
+- Prompt types match the underlying field's data type.
+- Required prompts are validated before execution.
+- Defaults and dependent values behave predictably.
+- User inputs are passed safely to query execution.
+- Empty, invalid, and unavailable values have clear handling.
+- Existing saved reports remain compatible.
+
+---
+
+## Prompt 5 — P1: Save, Edit, Duplicate, and Reuse Reports
+
+Enhance the existing saved-report workflow to support edit, save-as, duplicate, rename, and clear ownership and sharing rules. Prevent accidental overwrites and handle concurrent modifications safely.
+
+Preserve existing report IDs, definitions, and subscriptions wherever possible. Add confirmation messages and regression tests.
+
+Acceptance criteria:
+- Users can distinguish editing an existing report from creating a copy.
+- Overwrites and destructive actions are confirmed where appropriate.
+- Concurrent changes do not silently overwrite newer edits.
+- Ownership and sharing permissions are enforced.
+- Existing report references and subscriptions continue to work.
+
+---
+
+## Prompt 6 — P1: Scheduled Reports and Subscriptions
+
+Review the existing subscription and scheduling functionality. Identify missing capabilities for frequency, start date, time zone, recipients, delivery format, failure notifications, pause/resume, and cancellation.
+
+Reuse existing scheduling infrastructure. Ensure permissions are revalidated when a report executes and avoid duplicate or overlapping scheduled jobs.
+
+Acceptance criteria:
+- Schedule frequency, time zone, and delivery settings are explicit.
+- Users can view and manage their subscriptions according to permissions.
+- Failed jobs are logged and surfaced appropriately without exposing sensitive data.
+- Duplicate or overlapping execution is controlled.
+- Access is revalidated at execution and delivery time.
+- Existing subscriptions remain valid.
+
+---
+
+## Prompt 7 — P1: Performance and Scalability
+
+Analyze report execution performance and scalability using the current architecture. Check pagination, query timeouts, result limits, repeated queries, expensive joins, and large exports.
+
+Recommend measurable improvements without prematurely introducing caching or changing database architecture. Add performance tests or benchmarks where practical.
+
+Acceptance criteria:
+- Large result sets are handled predictably.
+- Queries have appropriate timeout and result-limit behavior.
+- Pagination does not return duplicate or missing rows under supported ordering rules.
+- Expensive query paths are identified with evidence.
+- Any optimization preserves result correctness and authorization.
+- Performance changes are measured against a baseline where possible.
+
+---
+
+## Prompt 8 — P2: Improve the End-User Experience
+
+Audit the current BI tool from a nontechnical business user's perspective. Identify confusing steps, unclear labels, missing guidance, poor empty states, and unhelpful errors.
+
+Improve the existing UI incrementally, maintaining current design conventions. Ensure keyboard accessibility, readable tables, consistent loading states, and responsive behavior.
+
+Acceptance criteria:
+- Common workflows use consistent labels and controls.
+- Empty, loading, success, and error states are understandable.
+- Keyboard navigation and accessible labels are supported in key workflows.
+- Layouts remain usable at supported screen sizes.
+- Existing design conventions and working components are preserved.
+
+---
+
+## Prompt 9 — P2: Auditability and Operational Support
+
+Inspect current logging and operational monitoring. Recommend a minimal audit trail for report creation, changes, execution outcomes, access changes, and subscription modifications.
+
+Include timestamps, actor identity, report reference, and outcome where appropriate. Avoid logging sensitive query parameters or confidential result data. Integrate with existing logging patterns.
+
+Acceptance criteria:
+- Important report lifecycle and access events are traceable.
+- Logs contain enough context for support and investigation.
+- Sensitive values and result data are not unnecessarily recorded.
+- Logging follows existing retention and access policies.
+- Logging failures do not unexpectedly break normal report execution.
+
+---
+
+## Prompt 10 — P2: Reusable Report Templates
+
+Inspect whether the application already supports templates or reusable report definitions. Extend the current implementation so authorized users can save a report configuration as a template and create new reports from it.
+
+Preserve the existing data model where possible. Define which settings are copied (such as selected fields, visual/report type, filters, and layout) and which must be reset or re-entered (such as credentials, sensitive prompt values, recipients, and ownership-specific settings).
+
+Acceptance criteria:
+- Users can create reports from authorized templates.
+- Template permissions and ownership are respected.
+- Sensitive values are not copied unintentionally.
+- Template updates do not silently change existing reports created from older versions.
+- Existing report definitions remain compatible.
+
+---
+
+## Prompt 11 — P2: Report Types and Visualizations
+
+Review the existing report types and visualization components. Identify the most valuable missing options for the current users, such as tabular reports, grouped summaries, pivot-style views, charts, and KPI summaries, but do not add every option by default.
+
+Recommend additions based on existing architecture and user needs. Reuse current visualization components and ensure every visualization uses the same validated data and permission rules as the underlying report.
+
+Acceptance criteria:
+- Only supported and meaningful report types are offered for each data configuration.
+- Labels, aggregations, totals, and sorting are correct.
+- Charts and tables reflect the same authorized result set.
+- Users receive clear validation when a selected visualization is incompatible with the data.
+- Existing report types continue to work.
+
+---
+
+## Prompt 12 — P2: Export and Data Portability
+
+Inspect existing export capabilities and recommend practical support for formats such as CSV and Excel, and PDF where appropriate to the current product.
+
+Preserve permissions, filters, sort order, and clearly defined export limits. Prevent formula injection in spreadsheet-compatible exports where relevant. Avoid loading unbounded datasets into memory.
+
+Acceptance criteria:
+- Exports match the user's authorized report result and selected filters.
+- Large exports are bounded or processed safely.
+- Spreadsheet exports safely handle values that could be interpreted as formulas.
+- Export errors are understandable and do not leak sensitive information.
+- Existing report execution and export behavior remains compatible.
+
+---
+
+## Prompt 13 — P2: Error Handling and Recovery
+
+Audit the report builder and execution flow for unexpected failures, validation errors, timeouts, and unavailable data sources. Improve error handling using existing application conventions.
+
+Show users a clear, actionable message without exposing stack traces, SQL internals, credentials, or sensitive data. Preserve safe user input and report configuration when a recoverable operation fails.
+
+Acceptance criteria:
+- Users can distinguish invalid input, permission denial, timeout, and system failure.
+- Recoverable failures do not erase report configuration.
+- Detailed diagnostics are available through approved logs rather than public UI messages.
+- Error handling does not bypass security controls.
+- Tests cover key failure scenarios.
+
+---
+
+## Prompt 14 — P2: Accessibility and Responsive Behavior
+
+Review the existing report builder and report results screens for accessibility and responsive design. Prioritize keyboard operation, focus visibility, semantic labels, readable contrast, accessible validation messages, and usable tables at supported screen sizes.
+
+Follow the current design system and avoid a visual redesign.
+
+Acceptance criteria:
+- Key report workflows can be completed using a keyboard.
+- Inputs and validation messages have accessible labels.
+- Focus remains predictable during dialogs and navigation.
+- Tables and controls remain usable at supported viewport widths.
+- Existing visual conventions are preserved.
+
+---
+
+## Prompt 15 — P3: Natural-Language Report Assistance
+
+Assess whether a natural-language assistant would add value to the current BI tool. If appropriate, propose a small, controlled feature that translates user questions into a draft report configuration using only approved metadata and supported operations.
+
+Do not execute generated SQL without validation. Require users to review the selected fields, filters, measures, and interpretation before running the report. Clearly indicate ambiguity and ask clarifying questions.
+
+Acceptance criteria:
+- The assistant uses only authorized tables, columns, and measures.
+- Generated configurations are validated by the existing report engine.
+- Ambiguous questions trigger clarification rather than fabricated assumptions.
+- Users can review and edit the draft before execution.
+- Existing permissions and query safety controls cannot be bypassed.
+- If implementation would require a major architectural change, return a proposal instead of implementing it.
+
+---
+
+## Prompt 16 — P3: Report Usage and Adoption Insights
+
+Inspect existing telemetry and audit data to determine whether the product can safely provide basic usage insights, such as frequently used reports, execution failures, subscription reliability, and report adoption.
+
+Use existing logging where practical. Avoid collecting unnecessary personal or sensitive information, and respect access controls.
+
+Acceptance criteria:
+- Metrics are based on reliable, documented events.
+- Access to usage information is restricted appropriately.
+- Metrics avoid exposing report contents or sensitive parameters.
+- The feature has clear operational or product value.
+- New telemetry is minimized and follows existing retention policies.
+
+---
+
+## Prompt 17 — Release Readiness and Regression Test Plan
+
+Before declaring the BI tool market-ready, review the implemented workflows and create a release-readiness report.
+
+Cover:
+- Report creation, preview, execution, save, edit, duplicate, and reuse.
+- Filters, prompts, data types, aggregation, sorting, and pagination.
+- Authorization, row-level security, and restricted fields.
+- Exports, subscriptions, schedules, and failure handling.
+- Performance with realistic data volumes.
+- Accessibility and responsive behavior.
+- Backward compatibility for existing reports and subscriptions.
+- Logging, monitoring, and recoverability.
+
+For each issue, record severity, reproduction steps, expected behavior, actual behavior, and a recommended fix. Run available automated tests and identify tests that could not be run.
+
+Do not claim that a test passed unless it was actually executed. Separate verified results from assumptions and unresolved risks. Recommend release blockers and the smallest fixes needed before release.
+
+---
+
+## Suggested Implementation Order
+
+1. **Master prompt:** Inspect the implementation and produce a prioritized gap analysis.
+2. **P0 security:** Address verified critical security and data-integrity risks.
+3. **P1 core workflow:** Report creation, filters/prompts, save/edit/reuse, subscriptions, and performance.
+4. **P2 usability and operations:** Error handling, accessibility, templates, exports, auditability, and selected report types.
+5. **P3 differentiators:** Natural-language assistance and adoption insights, only if justified by user needs and architecture.
+6. **Release readiness:** Run regression tests and document unresolved risks.
+
+## Reusable Instruction to Append to Any Feature Prompt
+
+Before changing code, inspect the existing implementation and identify the exact files and components involved. Explain the proposed minimal change, dependencies, and regression risks. Preserve current architecture and behavior wherever possible. Implement only the agreed scope, add or update tests, run the relevant test suite, and report what changed, what was tested, test results, and any unresolved issues. Do not claim success for checks that were not actually performed.
